@@ -72,11 +72,45 @@ Another common pattern is to invoke C<create> without any values to create an em
 
 For L<HTML::FormFu::Model::HashRef>, both C<create> and C<update> perform exactly the same function, i.e. they return a hashref representing the new record.
 
-=item options_from_model
+=back
+
+=head1 USING HTML::FORMFU::MODEL::DBIC
+
+The rest of this chapter will focus exclusively on L<HTML::FormFu::Model::DBIC>, since this is the  more complex module and the one that you are most likely to need in your applications.
+
+=head2 Loading and configuring the model class
+
+Use C<model> to specify which model class you want to load:
+  
+  # loads HTML::FormFu::Model::DBIC
+  $form->model('DBIC');
+
+Normally your form will work with a particular DBIx::Class schema. You specify the name of that schema by putting a C<model> entry in the form's stash:
+
+  my $schema = My::Schema::Class->connect( ... );
+  $form->stash( schema => $schema );
+
+If you are working with Catalyst, you can just supply the name of a Catalyst model instead:
+
+  $form->stash( schema => 'Model::My::Schema::Class' );
+
+Although a form is normally associated with a particular L<DBIx::Class> result class, you do not normally have to specify which class that is. Instead, you pass an object of that class as the argument to C<default_values>, C<create> or C<update>. L<HTML::FormFu> will work happiliy as long as you have given it an object which has columns and relationships corresponding to the ones you have specified in the form definition.
+
+Most of the model configuration happens via the C<model_config> method of individual form elements. We will describe some of the most important options below.
+
+=head2 Populating select fields
+
+Before we move on to displaying and updating data from the database, we will discuss a very important topic - loading options for select field from the database.
 
 The C<options_from_model> method populates the options of group elements (e.g. a select, checkbox group, etc.) from the model. It is not available in L<HTML::FormFu::Model::HashRef>, and in L<HTML::FormFu::Model::DBIC> you are not supposed to call it directly, but it important to be aware of its existance since there are a number of configuratin options that affect its behavior.
 
-=back
+There is one exception, however. If you want to preload the options of a select or checkbox group field with values from the database, you must explicitly tell L<HTML::FormFu> how to fetch them. You do this by specifying a L<DBIx::Class> result class that will return the list of possible options.If you need to narrow the results you can use a search condition. Last, you can choose which column from the database contains the labels that will be displayed for each field in the group.
+
+=head2 Displaying and updating normal database fields
+
+=head2 Displaying and updating fields from has_one and has_many relationships
+
+=head2 Displaying and updating fields from many_to_many relationships
 
 =cut
 
