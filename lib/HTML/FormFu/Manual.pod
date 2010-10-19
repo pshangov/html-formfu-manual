@@ -1,0 +1,39 @@
+=pod
+
+=head1 NAME
+
+HTML::FormFu::Manual - Using HTML::FormFu, Perl's advanced form management library
+
+=head1 WHAT IS HTML::FORMFU
+
+=head1 TABLE OF CONTENTS
+
+=over
+
+=item Chapter I: L<HTML::FormFu::Manual::BasicConcepts>
+
+In which you will learn about the main concepts around HTML::FormFu's form management - form elements, form validation, models, and configuration files.
+
+=item Chapter II: L<HTML::FormFu::Manual::Stages>
+
+In which you will peek into the way in which HTML::FormFu builds forms, and what you can do at each stage of the process.
+
+=item Chapter III: L<HTML::FormFu::Manual::ConfigurationFiles>
+
+In which you will learn how HTML::FormFu's implements one of its most fundamental features, building forms from configuration files.
+
+=item Chapter IV: L<HTML::FormFu::Manual::Validation>
+
+In which you will learn about the different steps involved in form validation, and how you can hook into each one of them.
+
+=item Chapter V: L<HTML::FormFu::Manual::Models>
+
+In which you will learn to harness the power of HTML::FormFu models, and build comlex content management applications in a snap.
+
+=item Chapter VI: L<HTML::FormFu::Manual::Ajax>
+
+In which you will be shown tips and tricks about how to work with forms which are dynamically modified on the client side.
+
+=back
+
+=cut

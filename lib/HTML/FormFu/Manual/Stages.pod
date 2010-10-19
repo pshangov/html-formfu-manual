@@ -1,0 +1,173 @@
+=pod
+
+=head1 NAME
+
+HTML::FormFu::Manual::Stages - Stages in form processing
+
+=head1 INTRODUCTION
+
+To really be able to use all the power that L<HTML::FormFu> provides one must understand how it approaches form processing. Modules such as L<Catalyst::Controller::HTML::FormFu> hide the complexity of L<HTML::FormFu>'s workflow, but also make it difficult to figure out what happens in the backgound.
+
+=head1 FORM PROCESSING STAGES
+
+=head2 Create
+
+First, we have to create a form object:
+
+  use HTML::FormFu;
+  my $form = HTML::FormFu->new;
+
+This creates a new form object. Note that initally this is a pretty useless form object - it has no form elements, no validation rules, nothing. Basically, we start from zero and will be making our object more powerful as we build our form.
+
+=head2 Populate
+
+Once we have an empty form object to work on, we need to tell it about the form we want to create. We need to tell it about the filds we want our form to have, and what validation rules to attach to each field. Let us say that we want to create a form with a single input field and a submit button, and we want the input field to be manadtory. The final markup will look like that:
+
+  <form>
+    <input type="text" name="greeting" />
+    <input type="submit" />
+  </form>
+
+Our form object will need to consist of an L<HTML::FormFu::Element::Text> object, with an L<HTML::FormFu::Constraint::Required> attached, and an L<HTML::FormFu::Element::Submit> object. But L<HTML::FormFu> does not expect us to create these object by hand and pass them to it. Instead, we give it a hashref that contains information about the form definition, and L<HTML::FormFu> takes care of inflating this definition into the proper objects. Thus, for the above form, a configuration hashref might look like this:
+
+  my $definition = {
+    elements => [
+	  {
+	  	type => 'Text',
+		name => 'greeting',
+		constraings => [ 'Required' ],
+	  },
+	  {
+	  	type => 'Submit',
+	  },
+	]
+  };
+
+We will look in more detail into the structure of the configuration hash in the next chapter, but even now you can see how this hash maps to the definition of the form we want to create. In order to feed it to our form, we can do the following:
+
+  $form->populate($definition);
+
+Now our form object is loaded with information about the form we want to work with. Internally, it has converted the data structure we passed it into a list of HTML::FormFu::* objects that are now ready to work with acutal data.
+
+=head2 Load
+
+=head3 Supplying default values
+
+Once that we have our form definition in place, we can start loading data into it. There are several ways we can do that. If we are displaying the form to the user for the first time, we may want to load some default values into it. This is how we do that:
+
+  $form->default_values( { greeting => 'Hello world!' } );
+
+Now when we display the form to the user, she will see the string C<'Hello world!'> in the input field, and she may change it it she wants to. The C<default_values> method of our form object takes as a parameter a single hashref whose keys are the names of form fields we want to supply default values for. 
+
+You will often want to use this functionality when you create forms to edit existing database data. You normally want to get the field values from the database record, supply them as default values to the form, and let the user edit them. Imagine that the form below was use to edit greeting messages stored in a database. Your greetings table is very simple, with only two colums: a greeting id and the greeting text. Assuming that you have a DBIx::Class schema for that database, you may do something like this to supply default values for your form:
+
+  # table 'greeting' has two colums: 'id' and 'greeting'
+  my $result = $schema->resultset('Greeting')->find({ id => 1 });
+  $form->model->default_values($result);
+
+Here we use the C<default_values> method of the model associated by the form, because potentially the result object can be a very complex datastructure, and the model's C<default_values> method takes care of flattening this datastructure to a simple hashref apprporate for the basic C<default_values> method. You will learn how to use models later in Chapter V: L<HTML::FormFu::Manual::Models>.
+
+=head3 Processing query parameters
+
+If a form has already been submitted, we want it supply it the values entered by the user. This is done by using the C<query> method.
+
+  my $submitted_values = {
+    greeting => 'Howdy!',
+	submit => undef,
+  };
+
+  $from->query($submitted_values);
+
+The C<query> method can be passed either a hashref of keys and values, a C<CGI.pm>-compatible query object, or a L<Catalyst>-compatible query object. See the docs for C<HTML::FormFu::QueryType::*> for more details. 
+
+Note also that to L<HTML::FormFu> it doesn't matter if you invoke C<query> or C<default_values> before C<populate> or vice versa. These two methods simply load data into the form object, but they do nothing with it until the process stage (see below), so it doesn't really matter if you have loaded data before you have supplied the form definition.
+
+=head2 Process
+
+The process stage is where L<HTML::FormFu> compares the supplied form data with the form definition, performs any necessary validation and generates errors if the data is not OK. You process the form simply by invoking the C<process> method:
+
+  $form->process;
+
+Now you can check if the form generated any errors:
+  
+  if ( $form->has_errors )  {
+    my @errors = $form->get_errors;
+  }
+
+If there were validation errors, C<@errors> will contain a list of C<HTML::FormFu::Exception> objects that you can query about the details for each error. C<HTML::FormFu> also provides a C<submitted> method that you can use to tell if the form was actually submitted or not (see L<HTML::FormFu/indicator> for details). And C<sumitted_and_valid> is a shortcut for C<$form-E<gt>submitted and !$form-E<gt>has_errors>. Thus, it is a common idiom to write something like that:
+
+  if ( $form->submitted_and_valid ) {
+  	# do something with the values
+  } else {
+  	# display the form
+  }
+
+=head2 Render
+
+After we have processed a form, we can invoke the C<render> method on it to obtain its current representation as html. 
+
+  my $html = $form->render;
+
+Thus, if the form has not been submitted and has not been supplied default values, the resulting html will look simply like this:
+
+  <form>
+    <input type="text" name="greeting" />
+    <input type="submit" />
+  </form>
+
+If, on the other hand, we have supplied a default value of C<'Hello world!'> for C<greeting>, the html will reflect it:
+
+  <form>
+    <input type="text" name="greeting" value="Hello, world!" />
+    <input type="submit" />
+  </form>
+
+If the form has been submitted but the C<greeting> field is blank, thus violating the C<Required> constraing, an error message will be added:
+
+  <form>
+    <input type="text" name="greeting" value="Hello, world!" />
+    <input type="submit" />
+  </form>
+
+If the form has been submitted and valid there will be no need to display it again to the user. If you call render on a validly submitted form it will ...
+
+=head2 Update
+
+The update stage exists only if you are using a model with L<HTML::FormFu>. In a way it is an alternative to the render stage - this is what you will normally call if the form has been submitted and is valid. Note that C<update> is a method of the model class:
+
+  # this updates record with id = 1 from the database 
+  # with the values from the submitted form
+  my $result = $schema->resultset('Greeting')->find({ id => 1 });
+  $form->model->update($result);
+
+=head1 SUMMARY
+
+This is a simple flowchart that summarizes L<HTML::FormFu>'s workflow:
+
+             +----------------+
+             |     create     |
+             +----------------+
+                      |
+             +----------------+
+             |    populate    |
+             +----------------+
+                      |
+  +----------------+     +----------------+ 
+  | default_values | OR  |     query      | 
+  +----------------+     +----------------+ 
+                      |
+             +----------------+  
+             |    process     |  
+             +----------------+  
+                      |
+  +----------------+     +----------------+ 
+  |     render     | OR  |     update     | 
+  +----------------+     +----------------+ 
+
+
+=head1 EXAMPLE
+
+To put things in perspective, let's put the code samples above into a comlete working example.
+
+=cut
+

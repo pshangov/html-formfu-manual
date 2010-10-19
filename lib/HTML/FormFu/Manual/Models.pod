@@ -1,0 +1,82 @@
+=pod
+
+=head1 NAME
+
+HTML::FormFu::Manual::Models - Interaction with data stores via models
+
+=head1 INTRODUCTION
+
+One of the most powerful features of L<HTML::FormFu> is its ability to integrate with various data models and automatically perform opearations with the form values, e.g. updating the corresponding database fields. In this chapter we will dissect how L<HTML::FormFu> models work and how you can use them to dramatically reduce the development time for you applications.
+
+=head1 AVAILABLE MODELS
+
+Currently there are two models available for use with L<HTML::FormFu>: L<HTML::FormFu::Model::HashRef>, which ships with the core L<HTML::FormFu> distribution, and L<HTML::FormFu::Model::DBIC>, which is a package which you need to install separately. L<HTML::FormFu::Model::HashRef> allows you to fill in forms from a hashref, or save form values to a hashref. It can be useful if you are interacting with a datastore that is not supported by L<HTML::FormFu> but can process data stored in hashrefs. L<HTML::FormFu::Model::DBIC> is a much more complicated modules which links L<HTML::FormFu> with the powerful L<DBIx::Class> library.
+
+=head1 WORKING WITH MODELS - THE BASICS
+
+Every L<HTML::FormFu> model class provides several important methods that add new functionality to your form object:
+
+=over
+
+=item default_values
+
+This method is similar to the C<default_values> method of the base L<HTML::FormFu> class, but while the C<$form-E<gt>default_values> accepts as its argument a simple hash of field names and their respective values, C<$form-E<gt>model-E<gt>default_values> allows us to fill in a form with default values from arguments that are specific to every model class. For example, L<HTML::FormFu::Model::HashRef> fills in default values from a hashref, while L<HTML::FormFu::Model::DBIC> fills in default values from a C<DBIx::Class::Result> object. Internally, each model class converts the values of its argument into a simple hash and passes its values to C<default_values> in L<HTML::FormFu>.
+
+=item create
+
+The C<create> method creates a new record from the values of the filled form. In the L<HTML::FormFu::Model::HashRef>, it creates a new hashref, and in the case of L<HTML::FormFu::Model::DBIC> creates a new C<DBIx::Class::Result> object and inserts it into the databse.
+
+  if ($form->submitted_and_valid)
+  {
+    # take the submitted values and create a new
+	# record in the database ???
+    $form->model->create({});
+  }
+
+=item update
+
+C<update> is similar to C<create>, but it updates an existing record rather than creating a new one. With L<HTML::FormFu::Model::DBIC> you need to provide as an argument to update a valid C<DBIx::Class::Result> object, and its values in the database will be updated with the ones submitted from the form. You will normally use C<update> in conjunction with C<default_values>: 
+
+  # fetch a record from the database
+  my $record = $dbic_resultset->find({ id => 5 });
+
+  # load the data from the record into the form
+  $form->model->default_values($record);
+
+  # later on in the script ....
+  if ($form->submitted_and_valid)
+  {
+    # take the submitted values, update the record object
+	# and save to database
+    $form->model->update($record);
+  }
+  
+Another common pattern is to invoke C<create> without any values to create an empty object and then work with it:
+
+  # create a new record
+  my $new_record = $dbic_resultset->create({});
+
+  # the above is identical to:
+  my $new_record = $form->model->create({});
+
+  # load the data from the record into the form
+  $form->model->default_values($new_record);
+
+  # later on in the script ....
+  if ($form->submitted_and_valid)
+  {
+    # take the submitted values, update the record object
+	# and save to database
+    $form->model->update($record);
+  }
+
+For L<HTML::FormFu::Model::HashRef>, both C<create> and C<update> perform exactly the same function, i.e. they return a hashref representing the new record.
+
+=item options_from_model
+
+The C<options_from_model> method populates the options of group elements (e.g. a select, checkbox group, etc.) from the model. It is not available in L<HTML::FormFu::Model::HashRef>, and in L<HTML::FormFu::Model::DBIC> you are not supposed to call it directly, but it important to be aware of its existance since there are a number of configuratin options that affect its behavior.
+
+=back
+
+=cut
+

@@ -1,0 +1,344 @@
+=pod
+
+=head1 NAME
+
+HTML::FormFu::Manual::ConfigurationFiles - Building a form from configuration files
+
+=head1 INTRODUCTION
+
+L<HTML::FormFu> has been designed to work with form definitions stored primarily in configuration files. This may be a feature or a drawback, depending on your preferences. L<HTML::FormHandler> is an alternative module which provides similar functionality, but forms are defined via Moose-based class properties, and constraints are Moose subtypes.
+
+=head1 HOW CONFIGURATION INSTRUCTIONS ARE PROCESSED
+
+=head2 Hash keys as methods
+
+Before we start looking into actual configuration files, let us examine the way HTML::FormFu processes that data structure that is passed to C<populate>. Let us have a look at the following configuration hash (if the meaning of some of the options is unclear to you don't worry, we will explain them further on in the tutorial):
+
+  my $definition = {
+    action       => 'process_form.cgi'
+    indicator    => 'submit',
+    auto_fieldset => 1,
+    elements     => [
+      {
+        type        => 'Text',
+        name        => 'user',
+        constraints => ['Required'],
+      },
+      {
+        type        => 'Password',
+        name        => 'pass',
+        constraints => ['Required'],
+      }
+      {
+        type => 'Submit'
+        name => 'submit'
+      }
+    ],
+    constraints => ['SingleValue']
+  };
+
+  $form->populate($definition);
+
+When we invoke C<populate> on the above definition, what happens is that C<populate> basically calls each key of the hash as a method of the form object. Thus, the following achieves identical results as above (the order of execution will not be the same - C<populate> has its own algorithm to determine which mehtods to call in what order):
+
+  $form->action('process_form.cgi');
+  $form->indicator('submit');
+  $form->auto_fieldset(1);
+  $form->elements([
+    {
+      type        => 'Text',
+      name        => 'user',
+      constraints => ['Required'],
+    },
+    {
+      type        => 'Password',
+      name        => 'pass',
+      constraints => ['Required'],
+    }
+    {
+      type => 'Submit'
+      name => 'submit'
+    }
+  ]);
+  $form->constraints(['SingleValue']);
+
+The same applies to nested hashes as well. For example, when L<HTML::FormFu> creates a form element, it knows first to create an instance of the specified elements, and then to call the respective methods on it. Thus, when you want to create an element with the following definition:
+
+  {
+    type        => 'Text',
+    name        => 'user',
+    constraints => ['Required'],
+  }
+
+L<HTML::FormFu> internally does the following:
+
+  my $element = HTML::FormFu::Element::Text->new;
+  $element->name('user');
+  $element->constraints(['Required']);
+
+=head2 Aliases
+
+Note that many methods in L<HTML::FormFu> have aliases in the plural and singular. Thus C<element> does the same as C<elements>, C<constraint> does the same as C<constraints>, etc. Further, these methods may take as their arguments either a hashref with the definition of a single item, or an arrayref of hashrefs with definitions for multiple items. As we will see later this is convenient when creating configuration files in different formats. It also means we can rewrite the element definitions in the above form as follows:
+
+  $form->element({
+    type        => 'Text',
+    name        => 'user',
+    constraints => ['Required'],
+  });
+  
+  $form->element({
+    type        => 'Password',
+    name        => 'pass',
+    constraints => ['Required'],
+  });
+
+  $form->element({
+    type => 'Submit'
+    name => 'submit'
+  });
+
+=head2 Accessing the element object
+
+The C<elements> method returns a list of element objects. This gives us the opportunity to work directly with it if we wish to. Here is yet another way to configure the elements specified above:
+
+  my ($user_el, $pass_el, $submit_el) = $form->elements([
+    {
+      type        => 'Text',
+      name        => 'user',
+    },
+    {
+      type        => 'Password',
+      name        => 'pass',
+    },
+    {
+      type => 'Submit'
+      name => 'submit'
+    },
+  ]);
+
+  $user_el->constraints(['Required']);
+  $pass_el->constraints(['Required']);
+
+We can also use the C<get_element> method of the form object to get hold of an element object:
+
+  $form->element({
+    type        => 'Text',
+    name        => 'user',
+  });
+
+  my $user_el = $form->get_element({ name => 'user' });
+  $user_el->constraints(['Required']);
+
+See L<HTML::FormFu/INTROSPECTION> for a list of all methods available for fetching individual objects from the form (including constraints, filters, etc.).
+
+=head2 Other methods to modify the form
+
+And finally, L<HTML::FormFu> provides several methods to manipulate the form directly: C<insert_before>, C<insert_after> and C<remove_element>. These methods allow you to perform additional processing on a form after it has been populated from a configuration file:
+
+  my $definition = {
+    elements     => [
+      {
+        type        => 'Text',
+        name        => 'user',
+        constraints => ['Required'],
+      },
+      {
+        type        => 'Password',
+        name        => 'pass',
+        constraints => ['Required'],
+      },
+	  {
+        type => 'Reset'
+        name => 'reset'
+	  }
+    ],
+    constraints => ['SingleValue']
+  };
+
+  $form->populate($definition);
+
+  # remove the reset button
+  my $reset_el = $form->get_element({ name => 'reset' });
+  $form->remove_element($reset_el);
+
+  # create a submit button
+  # TO CLARIFY: will this not add the element to the form? 
+  # TO CLARIFY: can we pass a simple hash to element?
+  my $submit_el = $form->element({ type => 'Submit', name => 'submit' });
+  
+  # insert it after the password field
+  my $pass_el = $form->get_element({ name => 'pass' });
+  $form->insert_after($submit_el, $pass_el);
+
+=head1 USING CONGIGURATION FILES
+
+So far we have only used hashrefs to define our forms. Normally, your forms definitions will be stored in configuration files that you will parse into a hashref and pass to C<populate>. L<HTML::FormFu> provides a convenient method for this, C<load_config_file>. It takes care of loading a configuration file in any of the formats supported by L<Config::Any> and populating the form from it. For example:
+
+  # in login_form.yaml
+
+  ---
+  action: /login
+  indicator: submit
+  auto_fieldset: 1
+
+  elements:
+    - type: Text
+      name: user
+      constraints:
+        - Required
+
+    - type: Password
+      name: pass
+      constraints:
+        - Required
+
+    - type: Submit
+      name: submit
+
+  constraints:
+    - SingleValue
+
+  # in your code
+  
+  my $form = HTML::FormFu->new;
+  $form->load_config_file('login_form.yaml');
+
+Most of the examples in the L<HTML::FormFu> documentation and test suite are in the YAML, but it is not difficult to translate them to other formats. If we are using L<Config::General> format the form will look like that (it is more apporpirate to use C<element> instead of C<elements> here):
+
+  # in login_form.conf
+
+  action /login
+  indicator submit
+  auto_fieldset 1
+
+  <element>
+    type Text
+    name user
+    constraints [Required]
+  </element>
+
+ <element> 
+    type Password
+    name pass
+    constraints [Required]
+  </element>
+
+ <element> 
+    type Submit
+    name submit
+ </element> 
+
+  constraints [SingleValue]
+
+  # in your code
+  
+  my $form = HTML::FormFu->new;
+  $form->load_config_file('login_form.conf');
+
+=head1 PREPROCESSING CONFIGURATION FILES
+
+Eearlier we saw that by using methods such as C<insert_before>, C<insert_after> and C<remove_element> we can manipulate the form object after it has been initially populated (from a configuration file or otherwise). Another way to modify the form definition stored in file is to preprocess the file I<before> it is passed to C<populate>.
+
+  # in login_form.yaml
+
+  ---
+  elements:
+    - type: Text
+      name: user
+ 
+    - type: Password
+      name: pass
+
+    - type: Submit
+      name: submit
+
+  # in your code
+
+  $form->config_callback(
+  # add a 'Required' constraint to the 'user' and 'pass' elements
+  	add_required => sub {
+		#TODO
+	}
+  );
+
+  $form->load_config_file('login_form.yaml');
+
+=head1 AVAILABLE CONFIGURATION OPTIONS
+
+The last question we have to answer is where to look for all the options you can use in your configuration file.
+
+=head2 L<HTML::FormFu>
+
+L<HTML::FormFu> is the base form class. As a general rule, any method that L<HTML::FormFu> provides can be used as a key in your configuration hash (with the exception of C<new>). Below is a list of the main types of methods that you can invoke via a configuratin file. We are not providing detailed documentation for the individual methods here, please consult the respective module for details:
+
+=over
+
+=item Attributes of the form element
+
+The L<HTML::FormFu> class roughly corresponds to the html C<E<lt>formE<gt>> tag of that form. Therefore, like all other elements in the L<HTML::FormFu>, it has an C<attributes> method that you can use to set custom attributes of the C<E<lt>formE<gt>> tag. There are special methods for some of the more important form attributes, namely C<id>, C<action>, C<enctype> and C<method>.
+
+=item Other options that apply to the form as a whole
+
+A number of other methods configure various aspects of the form behavior and output, but are not related to the html C<E<lt>formE<gt>> tag, e.g.  C<indicator>, C<auto_fieldset>, and C<javascript>. 
+
+=item Form elements
+
+The C<element> and C<elements> methods, as we saw above, are the means to add elements to the form.
+
+=item Default validation options
+
+The base L<HTML::FormFu> class also supports all methods to create filters, constraints, inflators and validators, which individual element classes have as well. These make no sense in the context of the main form object, but you can associate them with individual form elements via the C<names> option, or with all form elements when no list of C<names> is specified. This is useful when you want to set default validation rules for multiple elements at once.
+
+=item Default attributes
+
+In a somewat similar vein, C<default_args> is an option to supply default values to any type of element, constraint, etc.
+
+=item Configuration options
+
+All the methods related to the loading of configuration files, as well as the stash, are available in the base L<HTML::FormFu> class and in all other elements and validators. This allows you to load a configuration file from within a configuration file, or to load the contents of specific sub-section of the form from a separate configuration file (see L<Use includes> below). These methods are C<load_config_file>, C<config_callback>, C<config_file_path>, and C<stash>.
+
+=item Options related to model configuration
+
+The C<model> and C<model_config> options are available to both L<HTML::FormFu> and to all elements. The actual description of arguments that C<model_config> takes depend on the model used, and are to be found in the documentation of the specific model class (e.g. L<HTML::FormFu::Model::DBIC>).
+
+=item Methods that make no sense in a configuratin file
+
+Some of the methods in L<HTML::FormFu> make no sense in a configuration files, since they require something to be done with their return value. These are for example methods that introspect the state of the form (C<sumtitted>, C<valid>, C<param>), methods that introspect the structure of the form (
+C<get_element>, C<get_filter>, etc. 
+
+=back
+
+This is not meant to be a comprehensive listing of all methods available in L<HTML::FormFu>, please refer to the docs for complete information.
+
+=head2 Element classes
+
+When configuring an individual element, the main place to look for configuration options is, of course, the documentation for that element class. But besides that various properties may be documented in the parent classes of that element. For example, let us say that you want to use a combo box field. The inheritance hierarchy of L<HTML::FormFu::Element::ComboBox> is as follows:
+
+  +---------------------------------+
+  | HTML::FormFu::Element::ComboBox |
+  +---------------------------------+
+                   |
+                   V
+  +---------------------------------+
+  |  HTML::FormFu::Element::Multi   |
+  +---------------------------------+
+                   |
+                   V
+  +---------------------------------+
+  |  HTML::FormFu::Element::_Field  |
+  +---------------------------------+
+                   |
+                   V
+  +---------------------------------+
+  |      HTML::FormFu::Element      |
+  +---------------------------------+
+
+This means that for a complete list of options for a combo box you will have to consult the docs for each of these classes. This can indeed be daunting at the start, but you will soon find that most elements share a large number of common attributes, and most of the differences are documented in the top level element classes. You will normally find information about the parents of each class in the C<DESCRIPTION> section of its documentation.
+
+A similar logic applies to the documentation for the various types of classes involved in the validation process. For example, the docs for L<HTML::FormFu::Constraint::Bool> state that it inherits from L<HTML::FormFu::Constraint::Regex> and L<HTML::FormFu::Constraint>, which are the other two classes whose documentation you should consult.
+
+=head2 Model options
+
+And last but not least, a lot of important options pertaining to the specific model class you are using will be found in the docs for that class, specifically the options that can be passed to C<model_config> for the individual form elements.
+
+=cut

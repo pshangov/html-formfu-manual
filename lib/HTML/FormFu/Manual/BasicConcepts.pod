@@ -1,0 +1,146 @@
+=pod
+
+=head1 NAME
+
+HTML::FormFu::Manual::BasicConcepts - HTML::FormFu Manual Chapter I - Basic Concepts
+
+=head1 THE DIFFERENTS ASPECTS OF FORM PROCESSING
+
+There are several aspects of form processing, and there are multiple modules on CPAN to handle each of them:
+
+=over
+
+=item Generating forms
+
+Form generation involves producing the HTML markup for forms from some kind of configuration files, in order to spare the web developer the effort of writing the same html code over and over.
+
+=item Filling in forms
+
+Modules such as L<HTML::FillInForm> help inject data into an existing HTML form. This help for example when you want to redisplay the information in a form with errors.
+
+=item Validating forms
+
+There are a number of modules on CPAN that help validate forms, i.e. check that the user has entered acceptable information.
+
+=item Error display
+
+Hand in hand with validation, an important aspect of form processing is the ability to display to the user proper error messages, highlihgting the problematic field, whenever there were problems with the provided input.
+
+=item Form submission
+
+Last but not least, there are (currently) two libraries on CPAN, namely L<HTML::FormFu> and L<HTML::FormHandler> that in addition to all of the above can automatically save the data entered via the form in a data store, such as a database.
+
+=back
+
+=head1 BUILDING BLOCKS OF HTML::FormFu
+
+=head2 Elements
+
+Elements are the individual user interface items that comprise a form - input fields, buttons, etc. Elements fall into the following general categories:
+
+=over
+
+=item Simple form elements
+
+These are for example buttons, text fields, checkboxes, etc. See L<HTML::FormFu::Element/CORE FORM FIELDS> for a complete list of these.
+
+=item Derived form elements
+
+These are custom-made form fields based on existing HTML elements (e.g. a date field, or a number field). 
+
+=item HTML markup elements
+
+Threre are other a number of elements that you can use to insert HTML code other than input fields. These are:
+
+=over
+
+=item L<HTML::FormFu::Element::Label>
+
+An HTML label element.
+
+=item L<HTML::FormFu::Element::Fieldset>
+
+An HTML fieldset.
+
+=item L<HTML::FormFu::Element::SimpleTable>
+
+An element which allows you to format your form using a table (rather than divs).
+
+=item L<HTML::FormFu::Element::Hr>
+
+An HTML horizontal rule.
+
+=item L<HTML::FormFu::Element::Src>
+
+An element wich allows you to insert arbitrary HTML code within the form.
+
+=back 
+
+=item Grouping elements
+
+These are emelements which are designed to contain other elements.
+
+=over
+
+=item L<HTML::FormFu::Element::Block>
+
+A block element is used to separate logically a given group of elements. For example, a fieldset is a type of a block element.
+
+=item L<HTML::FormFu::Element::Repeatable>
+
+A repeatable element is used to display a list of items whose number is variable. For example, if you have a form which displays a list of todo's, a repeatable element may be used to display the todo items.
+
+=item L<HTML::FormFu::Element::Multi>
+
+A multi element is used to create a single form element comprising several individual form fields. For example, a date field may comprise of three individual input boxes, for date, month and year. Multi elements are often used in conjunction with inflators and deflators (see below).
+
+=back 
+
+=back
+
+=head2 Form validation 
+
+All of these are components of HTML::FormFu's data validation framework. They work in the following order:
+
+=over
+
+=item Filters
+
+Filters are used to perform data cleanup before any actual validation is performed. They do things such as trimming whitespace, performing HTML escaping, normalizing numbers, etc. Filters are also used to join the values of the individual fields within a multi elements into a single string which is then passed on for processing (see L<HTML::FormFu::Filter::CompoundJoin> and L<HTML::FormFu::Filter::CompoundSprintf>).
+
+=item Constraints
+
+Constraints do the bulk of the work that is commonly associatied with form validation. They define rules that a submitted value must match in order to be considered acceptable. There are constrains to check that a given field is required, that it maches a cetain regex, that it is of a certain length, that an uploaded file does not exceed a specified size, that an email address is valid, etc.
+
+=item Inflators
+
+Inflators allow you to corece a given field valued into an object so that it is easier to work with. A common use of an inflator would be to convert the value of a field representing a date into a L<DateTime> object.
+
+=item Validators
+
+Validators exist in order to allow you to create validation rules that are specific to the logic and state of your application and cannot be applied at constraint level. For example, if you have a registration form that aloows users to use their an address as a username, you would use a contraint to check that the email is valid, but you would use a validator to check if this email does not already exist in the database, and display an error if it does. L<HTML::FormFu> does not come with any validators - since they are always application specific you have to create your own validators by subclassing L<HTML::FormFu::Validator>.
+
+=back
+
+=head2 Models
+
+Models are one of the most powerful aspects of L<HTML::FormFu>. They allow you to link to a specified data store and update it automatically when the form receives valid input. Currently L<HTML::FormFu> has three models:
+
+=over
+
+=item L<HTML::FormFu::Model::DBIC>
+
+L<HTML::FormFu::Model::DBIC> allows you to link a form with a L<DBIx::Class::ResultSet> object, so that you can load default values into the form from this object, or update it with the submitted form information.
+
+=item L<HTML::FormFu::Model::LDAP>
+
+=item L<HTML::FormFu::Model::HashRef>
+
+L<HTML::FormFu::Model::HashRef> is a simple module that allows you to load data into a form from a hashref, or load submitted form values into a hashref. This module is a good starting point if you want to link an unsupported data source to L<HTML::FormFu>.
+
+=back
+
+=head2 I18N 
+
+=cut
+

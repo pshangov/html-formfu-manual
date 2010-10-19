@@ -1,0 +1,36 @@
+=pod
+
+=head1 NAME
+
+HTML::FormFu::Manual::Validation - How HTML::FormFu validation works
+
+=head1 INTRODUCTION
+
+L<HTML::FormFu>'s validation process process is very simple and straighforward, and at the same time very powerful. Basically all you need to understand is how the different stages in the validation process work, and we already explained that in Chapter I - L<HTML::FormFu::Manual::BasicConcepts>. A good overview is also available in L<HTML::FormFu/FORM LOGIC AND VALIDATION>.
+
+=head2 WHERE TO FIND DOCUMENTATION
+
+=over
+
+=item Filters
+
+L<HTML::FormFu::Filter> provides a listing of all filters included in the core L<HTML::FormFu> distribution. Most of the names are self-explanatory and you can lookup the documentation for each module for details.
+
+=item Constraints
+
+Similarly, L<HTML::FormFu::Constraint> provides a listing of all constraints included in the core L<HTML::FormFu> distribution. 
+
+=item Inflators
+
+The core L<HTML::FormFu> distribution only ships with two default inflators, both used to inflate a field into a L<DateTime> object.
+
+=item Validators
+
+L<HTML::FormFu> does not provide any validators, you have to write your own by either subclassing L<HTML::FormFu::Validator> or by using L<HTML::FormFu::Validator::Callback>.
+
+=head1 CLIENT-SIDE VALIDATION
+
+L<HTML::FormFu> does not provide any built-in functionality for client-side validation.
+
+=cut
+
