@@ -100,17 +100,342 @@ Most of the model configuration happens via the C<model_config> method of indivi
 
 =head2 Populating select fields
 
-Before we move on to displaying and updating data from the database, we will discuss a very important topic - loading options for select field from the database.
+Before we move on to displaying and updating data from the database, we will discuss a very important topic - loading options for select fields from the database.
 
-The C<options_from_model> method populates the options of group elements (e.g. a select, checkbox group, etc.) from the model. It is not available in L<HTML::FormFu::Model::HashRef>, and in L<HTML::FormFu::Model::DBIC> you are not supposed to call it directly, but it important to be aware of its existance since there are a number of configuratin options that affect its behavior.
+We have a C<Books> schema for a database containing information about books. One of the tables in the database - C<genre>, contains a list of genres that can be associated with books. Here is the result class for the C<genre> table:
 
-There is one exception, however. If you want to preload the options of a select or checkbox group field with values from the database, you must explicitly tell L<HTML::FormFu> how to fetch them. You do this by specifying a L<DBIx::Class> result class that will return the list of possible options.If you need to narrow the results you can use a search condition. Last, you can choose which column from the database contains the labels that will be displayed for each field in the group.
+  ### Books/Result/Genre.pm ###
 
-=head2 Displaying and updating normal database fields
+  package Books::Result::Genre;
 
-=head2 Displaying and updating fields from has_one and has_many relationships
+  use DBIx::Class::Candy;
+  
+  table 'genre';
+  
+  column 'id' => {
+    data_type         => 'int',
+    is_auto_increment => 1,
+  };
+  
+  column 'name' => {
+    data_type   => 'varchar',
+  };
+  
+  primary_key 'id';
+  
+  1;
+  
+And here is the list of pre-defined genres that the C<genre> table contains:
 
-=head2 Displaying and updating fields from many_to_many relationships
+  id  name
+  --  -----------------
+  1   Children's
+  2   Fantasy
+  3   Horror
+  4   Mystery
+  5   Romance
+  6   Science Fiction
+  7   Short Fiction
+  8   Thriller/Suspense
+
+When creating or editing a book record, we want to be able to choose from that list of genres. Normally we would do that by using either a select field or a group of radio buttons. We will create a script that builds that form and prints it out to STDOUT:
+
+  use strict;
+  use warnings;
+
+  use HTML::FormFu;
+  use Books;
+  
+  my $form = HTML::FormFu->new;
+  
+  # load configuration file
+  $form->load_config_file("books.conf");
+  
+  # setup model and schema
+  $form->model('DBIC');
+  my $schema = Books->connect( ... );
+  $form->stash( schema => $schema );
+
+  $form->process;
+  
+  print $form->render;
+
+We will start with the folowing configuration file (named C<books.conf>, in L<Config::General> format):
+
+  <element>
+    name name
+    type Text
+  </element>
+  
+  <element>
+    name genre
+    type Select
+  </element>
+  
+  <element>
+    name submit
+    type Button
+  </element>
+
+Nothing surprising here, here is the output that we get when we render the form:
+
+  <form action="" method="post">
+    <div class="text">
+      <input name="name" type="text" />
+    </div>
+    <div class="select">
+      <select name="genre">
+      </select>
+    </div>
+    <div class="button">
+      <input name="submit" type="button" />
+    </div>
+  </form>
+
+But if we change the definition of the C<author> field as follows:
+
+  <element>
+    name genre
+    type Select
+    <model_config>
+      resultset Genre
+    </model_config>
+  </element>
+
+we get all the options for the select field populated from the database:
+
+  <form action="" method="post">
+    <div class="text">
+      <input name="name" type="text" />
+    </div>
+    <div class="select">
+      <select name="genre">
+        <option value="1">Children&#39;s</option>
+        <option value="2">Fantasy</option>
+        <option value="3">Horror</option>
+        <option value="4">Mystery</option>
+        <option value="5">Romance</option>
+        <option value="6">Science Fiction</option>
+        <option value="7">Short Fiction</option>
+        <option value="8">Thriller/Suspense</option>
+      </select>
+    </div>
+    <div class="button">
+      <input name="submit" type="button" />
+    </div>
+  </form>
+
+What happened here? As we said earlier, all options specific to the particular model we are using are specified in a C<model_config> hashref. In order for L<HTML::FormFu::Model::DBIC> to populate our select fields, several conditions need to be in place:
+
+=over
+
+=item *
+
+The form element must inherit from L<HTML::FormFu::Element::_Group>, i.e. one of L<HTML::FormFu::Element::ComboBox>, L<HTML::FormFu::Element::Radiogroup>, L<HTML::FormFu::Element::Checkboxgroup> or L<HTML::FormFu::Element::Select>.
+
+=item * 
+
+The C<resultset> option must be passed to C<model_config>, so that L<HTML::FormFu::Model::DBIC> knows which result class to use to fetch the values. If C<resultset> does not contain any column (C<:>) characters, it will be expanded into a result class belonging to the loaded schema (i.e. C<Genre> will become C<Books::Result::Genre>). Otherwise it will be used as is.
+
+If no resultset is specified, but C<model_config> is present, L<HTML::FormFu::Model::DBIC> will attempt to guess the result class from the name of the element. So, the following two element definitionss are equivalent:
+
+  <element>
+    name something
+    type Select
+    <model_config />
+  </element>
+
+  # is the same as:
+
+  <element>
+    name something
+    type Select
+    <model_config>
+      resultset Something
+    </model_config>
+  </element>
+
+=item *
+
+And last, we may need to specify which colum to use as the value for each option, and which colum to use as the label. By default L<HTML::FormFu::Model::DBIC> uses the column holding the primary key as the value, and the first text column in the table as the label. You can override this behaviour with the C<id_column> and C<label_column> options respectively. The following definition of the select element achieves the same result as above, but is explicit about which columns to use for option values and labels:
+
+  <element>
+    name genre
+    type Select
+    <model_config>
+      resultset Genre
+	  id_column id
+	  label_column name
+    </model_config>
+  </element>
+
+=back
+
+Let us say that at some point later a new requirement comes up that you must add non-fiction generes to the database, and you must be able to distinguish them from the fiction genres. We will add a boolean colum to specify whether a genre is fiction or not. The new C<genre> table will look like that:
+
+  id  name                     fiction
+  --  -----------------------  -------
+  1   Children's               1
+  2   Fantasy                  1
+  3   Horror                   1
+  4   Mystery                  1
+  5   Romance                  1
+  6   Science Fiction          1
+  7   Short Fiction            1
+  8   Thriller/Suspense        1
+  9   Essay                    0
+  10  Journal                  0
+  11  History                  0
+  12  Scientific Paper         0
+  13  Biography                0
+  14  Textbook                 0
+  15  Travel Book              0
+  16  Technical Documentation  0
+
+And of course we add the new column in our C<Books::Result::Genre> class as well:
+
+  package Books::Result::Genre
+
+  ...
+
+  column 'fiction' => {
+    data_type => 'int',
+	size      => 1,
+  };
+
+  ...
+
+Now if we are required to create a form for editing non-fiction books, we may request that our select field be populated with only a subset of the rows in the C<genre> table. We change the definition of the select element as follows:
+
+  <element>
+    name genre
+    type Select
+    <model_config>
+      resultset Genre
+      <condition>
+	    fiction 0
+	  </condition>
+    </model_config>
+  </element>
+
+This will produce the following form:
+
+  <form action="" method="post">
+    <div class="text">
+      <input name="name" type="text" />
+    </div>
+    <div class="select">
+      <select name="genre">
+        <option value="9">Essay</option>
+        <option value="10">Journal</option>
+        <option value="11">History</option>
+        <option value="12">Scientific Paper</option>
+        <option value="13">Biography</option>
+        <option value="14">Textbook</option>
+        <option value="15">Travel Book</option>
+        <option value="16">Technical Documentation</option>
+      </select>
+    </div>
+    <div class="button">
+      <input name="submit" type="button" />
+    </div>
+  </form>
+
+Actually L<HTML::FormFu::Model::DBIC> has two complementary options that affect how rows are selected: C<condition> and C<attributes>. They are passed as the first and second argument to L<DBIx::Class::ResultSet::search> respectively. I.e. if you have the following C<model_config> specification for an element:
+
+  <model_config>
+    resultset SomeTable
+    <condition>
+	  ...
+	</condition>
+	<attributes>
+	  ...
+	</attributes>
+  </model_config>
+
+Assuming that the above definition is parsed into a C<$model_config> hashref, L<HTML::FormFu::Model::DBIC> will internally do something like this to fetch the rows containing the requested options:
+
+  $schema->resultset( $model_config->resultset )->search( 
+    $model_config->condition, 
+	$model_config->attributes,
+  );
+
+=head2 Displaying and updating table fields
+
+=head2 Displaying and updating fields from related tables
+
+=head2 Working with many_to_many relationships
+
+Some time after we have implemented our database, however, a new requirement comes up that more than one genre may be spefied for each book. To achieve that, we will need to add an intermediary table to keep track of the links between books and genres.
+
+  ### Books/Result/Book.pm ###
+
+  package Books::Result::Book;
+  
+  use DBIx::Class::Candy;
+  
+  table 'book';
+
+  column 'id' => {
+    data_type         => 'int',
+    is_auto_increment => 1,
+  };
+  
+  column 'name' => {
+    data_type   => 'varchar',
+  };
+  
+  many_to_many 'genres' => ( 'Books::Result::Genre', 'genre_id' );
+
+  primary_key 'id';
+
+  1;
+  
+  ### Books/Result/Genre.pm ###
+
+  package Books::Result::Genre;
+
+  use DBIx::Class::Candy;
+  
+  table 'genre';
+  
+  column 'id' => {
+    data_type         => 'int',
+    is_auto_increment => 1,
+  };
+  
+  column 'name' => {
+    data_type   => 'varchar',
+  };
+  
+  primary_key 'id';
+  
+  many_to_many 'books' => ( 'Books::Result::Book', 'genre_id' );
+
+  1;
+
+  ### Books/Result/BookGenre.pm ###
+
+  package Books::Result::BookGenre;
+
+  use DBIx::Class::Candy;
+  
+  table 'book_genre';
+  
+  column 'book_id' => {
+    data_type         => 'int',
+  };
+  
+  column 'genre_id' => {
+    data_type         => 'int',
+  };
+  
+  primary_key 'book_id', 'genre_id';
+  
+  has_many 'books' => ( 'Books::Result::Book', 'book_id' );
+  has_many 'genres' => ( 'Books::Result::Genre', 'genre_id' );
+
+  1;
 
 =cut
 
