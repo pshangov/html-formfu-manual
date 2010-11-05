@@ -362,11 +362,9 @@ Assuming that the above definition is parsed into a C<$model_config> hashref, L<
 
 =head2 Displaying and updating table fields
 
-=head2 Displaying and updating fields from related tables
+Now let us look at the most important part of working with models - automatically retrieving, displaying and updating data from the data store. The key link between fields in the database and fields in the form is the C<name> attribute (or C<nested_name> for Repeatable elements). In order to fill a form with data about a specific record from the database, you pass the record object to C<default_values>. In order to update a record, you pass the record object to the C<update> method.
 
-=head2 Working with many_to_many relationships
-
-Some time after we have implemented our database, however, a new requirement comes up that more than one genre may be spefied for each book. To achieve that, we will need to add an intermediary table to keep track of the links between books and genres.
+Let us start with a simple book table. Here is the definition of the resultset object:
 
   ### Books/Result/Book.pm ###
 
@@ -381,10 +379,123 @@ Some time after we have implemented our database, however, a new requirement com
     is_auto_increment => 1,
   };
   
-  column 'name' => {
+  column 'title' => {
     data_type   => 'varchar',
   };
   
+  column 'author' => {
+    data_type   => 'varchar',
+  };
+
+  column 'publish_date' => {
+    data_type   => 'date',
+  };
+
+  primary_key 'id';
+
+  1;
+
+The configuration file for a form to edit a book record may look like this:
+
+  <element>
+    name title
+    type Text
+	label "Title"
+  </element>
+  
+  <element>
+    name author
+    type Text
+	label "Author"
+  </element>
+
+  <element>
+    name publish_date
+    type Date
+	label "Publish date"
+  </element>
+
+  <element>
+    name submit
+    type Button
+  </element>
+
+Now if we display the form and the user enters some values, we would need to do something like that to enter a new record in the database:
+
+  ...
+  if ($form->submitted_and_valid) {
+  	my $result = $schema->resultset('Book')->create;
+	$form->model->update($result);
+  }
+
+This creates a new empty record, and passes it to C<update>, which takes care of updating the record with the submitted values and saving it into the database. Here is how to go about editing an existing record:
+
+  my $result = $schema->resultset('Book')->find({ id => $id });
+  $form->model->default_values($result);
+
+The form will be displayed with data from that record filled-in. After the form is submitted, updating the result object is as simple as:
+
+  if ($form->submitted_and_valid) {
+	$form->model->update($result);
+  }
+
+=head2 Displaying and updating fields from related tables
+
+So far so good, but things become more complicated when a result object involves relationships between different tables. Let us expand on the topic of loading options from the database, and add updating to the mix. We will update our C<Book> class as follows, and the C<Books::Result::Genre> class will be identical to the one we used above:
+
+  ### Books/Result/Book.pm ###
+
+  package Books::Result::Book;
+  
+  use DBIx::Class::Candy;
+  
+  table 'book';
+
+  ...
+
+  column 'genre_id' => {
+    data_type => 'int',
+  };
+  
+  has_one 'genre' => ( 'Books::Result::Genre', 'genre_id' );
+
+  primary_key 'id';
+
+  1;
+
+We will add a combobox to our form definition to select a genre.
+
+  ...
+  <element>
+    name genre
+    type Combobox
+	label Genre
+    <model_config>
+      resultset Genre
+    </model_config>
+  </element>
+  ...
+
+You can use either C<genre>, or C<genre_id> as field name here. In the former case C<HTML::FormFu> will figure out that you want to update the C<genre> relationship and will know that it can do that by setting C<genre_id> in the C<book> table to the desired id. In the latter case it will just update C<genre_id> directly - in both cases the result will be the same. It is generally cleaner to use the name of the relationship as the C<name> attribute. For this to work, of course, we will have to use a form element that is based on L<HTML::FormFu::Element::_Group> and allows setting of a single option only, i.e.  L<HTML::FormFu::Element::Radiogroup>, L<HTML::FormFu::Element::Combobox> or L<HTML::FormFu::Element::Select> without the multiple attribute.
+
+This becomes even more clear if we consider C<many_to_many> relationships. Let us say that some time after we have implemented our database, a new requirement comes up that more than one genre may be spefied for each book. To achieve that, we will need to add an intermediary table to keep track of the links between books and genres. We will have the following three table classes:
+
+  ### Books/Result/Book.pm ###
+
+  package Books::Result::Book;
+  
+  use DBIx::Class::Candy;
+  
+  table 'book';
+
+  column 'id' ...
+  
+  column 'title' ...
+
+  column 'author' ...
+
+  column 'publish_date' ...
+
   many_to_many 'genres' => ( 'Books::Result::Genre', 'genre_id' );
 
   primary_key 'id';
@@ -399,14 +510,9 @@ Some time after we have implemented our database, however, a new requirement com
   
   table 'genre';
   
-  column 'id' => {
-    data_type         => 'int',
-    is_auto_increment => 1,
-  };
+  column 'id' ... 
   
-  column 'name' => {
-    data_type   => 'varchar',
-  };
+  column 'name' ...
   
   primary_key 'id';
   
@@ -436,6 +542,28 @@ Some time after we have implemented our database, however, a new requirement com
   has_many 'genres' => ( 'Books::Result::Genre', 'genre_id' );
 
   1;
+
+The only thing we need to do to make the new relationship work is to change the type of the form element to one that can accept multiple values (i.e. L<HTML::FormFu::Element::Checkboxgroup> or L<HTML::FormFu::Element::Select> with the multiple attribute set):
+
+  ...
+  <element>
+    name genre
+    type Select
+	label Genre
+	<attributes>
+	  multiple 1
+	</attributes>
+    <model_config>
+      resultset Genre
+    </model_config>
+  </element>
+  ...
+
+Now updating the result object will correctly set C<genre_id> and C<book_id> in table C<book_genre>.
+
+=head2 Directly editing fields in related tables
+
+
 
 =cut
 
