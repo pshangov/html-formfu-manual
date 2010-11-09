@@ -563,7 +563,211 @@ Now updating the result object will correctly set C<genre_id> and C<book_id> in 
 
 =head2 Directly editing fields in related tables
 
+In the above examples we used lists of predifined options to set data related to other tables. Sometimes, however, we need to be able to edit directly data that is in a different table. The way this works in L<HTML::FormFu::Model::DBIC> is again very straightforward - to edit fields from a different table, you need to place those fields in a block which has a C<nested_name> property that corresponds to the respective relationship name. L<HTML::FormFu::Model::DBIC> will recognize that these fields belong to the related table and will update them accordingly.
 
+Let us look at some examples now. Imagin that we have an C<author> table in our database with informatin about books, and we have a separate table C<address> that holds the address of each author. Our schema classes will look like this:
+
+  ### Books/Result/Author.pm ###
+
+  package Books::Result::Author;
+  
+  use DBIx::Class::Candy;
+  
+  table 'author';
+
+  column 'id' ...
+  
+  column 'name' ...
+
+  column 'address_id' ...
+
+  belongs_to 'address' => ( 'Books::Result::Address', 'address_id' );
+
+  primary_key 'id';
+
+
+  ### Books/Result/Address.pm ###
+
+  package Books::Result::Address;
+  
+  use DBIx::Class::Candy;
+  
+  table 'address';
+
+  column 'id' ...
+  
+  column 'country' ...
+
+  column 'city' ...
+
+  column 'street' ...
+
+  has_one 'author' => ( 'Books::Result::Author', 'address_id' );
+
+  primary_key 'id';
+
+When displaying the form to edit an author, we want to be able to edit the author's address too. Here is what our configuration file should look like:
+
+  <element>
+    name name
+    type Text
+	label "Name"
+  </element>
+  
+  <element>
+    nested_name address
+    type Block
+	label "Address"
+
+    <element>
+      name country
+      type Text
+  	  label "Country"	
+	</element>
+
+	<element>
+      name city
+      type Text
+  	  label "City"	
+	</element>
+
+	<element>
+      name street
+      type Text
+  	  label "Street"	
+	</element>
+
+  </element>
+
+  <element>
+    name submit
+    type Button
+  </element>
+
+When you use C<nested_name> on a block, the value of C<nested_name> will be prepended to the name of each field within that block. This allows L<HTML::FormFu::Model::DBIC> to identify the fields that belong to foreign tables and update them accordingly. The above form will be rendered as follows:
+
+
+The last and most comlicated example that we will look into involves C<has_many> relationships, where we need to work with multiple rows from the related table at once. If we elaborate on the above scenario, imagine that we must modify our database to allow multiple addresses to be specified for each author. The new classes will have the following structure:
+
+  ### Books/Result/Author.pm ###
+
+  package Books::Result::Author;
+  
+  use DBIx::Class::Candy;
+  
+  table 'author';
+
+  column 'id' ...
+  
+  column 'name' ...
+
+  has_many 'addresses' => ( 'Books::Result::Address', 'author_id' );
+
+  primary_key 'id';
+
+
+  ### Books/Result/Address.pm ###
+
+  package Books::Result::Address;
+  
+  use DBIx::Class::Candy;
+  
+  table 'address';
+
+  column 'id' ...
+  
+  column 'country' ...
+
+  column 'city' ...
+
+  column 'street' ...
+
+  column 'author_id' ...
+
+  belongs_to 'author' => ( 'Books::Result::Author', 'author_id' );
+
+  primary_key 'id';
+
+The following is required in order to get this to work:
+
+=over
+
+=item * 
+
+All the fields from the related table must be within a L<HTML::FormFu::Element::Repeatable> block.
+
+=item * 
+
+As above, the C<nested_name> option of the L<HTML::FormFu::Element::Repeatable> block must be set to the name of the respective relationship (C<addresses> in our case).
+
+=item *
+
+The L<HTML::FormFu::Element::Repeatable> block must contain a Hidden field corresponding to the foreign key in the related table. Since we are working with multiple rows from the related table, this helps identify rows when updating the form.
+
+=item * 
+
+The  L<HTML::FormFu::Element::Repeatable> block's C<increment_field_names> must be set to true (it is true by default). We will look into the effects of this option shortly.
+
+=item *
+
+Outside the L<HTML::FormFu::Element::Repeatable> block we must include a L<HTML::FormFu::Element::Hidden> field, which will contain the number of repetitions of the L<HTML::FormFu::Element::Repeatable> block. Then we must specify the name of this field in the C<counter_name> option of the L<HTML::FormFu::Element::Repeatable> block. This field is populated and used internally by L<HTML::FormFu::Model::DBIC>.
+
+=back
+
+Here is an example configuration file for the new form:
+
+  <element>
+    name name
+    type Text
+	label "Name"
+  </element>
+  
+  <element>
+    name address_counter
+    type Hidden
+  </element>
+
+  <element>
+    nested_name address
+    type Repeatable
+	counter_name address_counter
+
+    <element>
+      name author
+      type Hidden
+	</element>
+
+    <element>
+      name country
+      type Text
+  	  label "Country"	
+	</element>
+
+	<element>
+      name city
+      type Text
+  	  label "City"	
+	</element>
+
+	<element>
+      name street
+      type Text
+  	  label "Street"	
+	</element>
+
+  </element>
+
+  <element>
+    name submit
+    type Button
+  </element>
+
+This is how this form will render:
+
+
+Notice how the use of the C<increment_field_names> option makes each row from the related table numbered:
+
+If you want to add to the C<has_many> relationship (i.e. add a new address row for this author), you can use the C<empty_rows> option of the C<model_config> section of the L<HTML::FormFu::Element::Repeatable> block to display the form with the specified number of additional empty rows at the end of the block. Alternatively you can use javascript to add dynamically a new element, e.g. by copying the least element in the L<HTML::FormFu::Element::Repeatable> block and incrementing its counter. And in order to delete an existing element you can add a checkbox with a C<delete_if_true> option of its C<model_config> section set to C<1>. Those addresses with this checkbox checked will be deleted upon form submission. Alternatively you can use javascript to remove this field from the form and decrement the counters of the other elements respectively.
 
 =cut
 
