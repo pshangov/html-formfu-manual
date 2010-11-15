@@ -1,0 +1,5 @@
+[% WRAPPER page.tt %]
+
+Hello world!
+
+[% END %]
