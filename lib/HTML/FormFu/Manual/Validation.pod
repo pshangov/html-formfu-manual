@@ -6,7 +6,7 @@ HTML::FormFu::Manual::Validation - How HTML::FormFu validation works
 
 =head1 INTRODUCTION
 
-L<HTML::FormFu>'s validation process process is very simple and straighforward, and at the same time very powerful. Basically all you need to understand is how the different stages in the validation process work, and we already explained that in Chapter I - L<HTML::FormFu::Manual::BasicConcepts>. A good overview is also available in L<HTML::FormFu/FORM LOGIC AND VALIDATION>.
+L<HTML::FormFu>'s validation process is very simple and straighforward, and at the same time very powerful. Basically all you need to understand is how the different stages in the validation process work, and we already explained that in Chapter I - L<HTML::FormFu::Manual::BasicConcepts>. A good overview is also available in L<HTML::FormFu/FORM LOGIC AND VALIDATION>.
 
 =head2 WHERE TO FIND DOCUMENTATION
 
@@ -27,6 +27,8 @@ The core L<HTML::FormFu> distribution only ships with two default inflators, bot
 =item Validators
 
 L<HTML::FormFu> does not provide any validators, you have to write your own by either subclassing L<HTML::FormFu::Validator> or by using L<HTML::FormFu::Validator::Callback>.
+
+=back
 
 =head1 CLIENT-SIDE VALIDATION
 

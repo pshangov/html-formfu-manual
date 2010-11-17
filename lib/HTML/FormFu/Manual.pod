@@ -4,8 +4,6 @@
 
 HTML::FormFu::Manual - Using HTML::FormFu, Perl's advanced form management library
 
-=head1 WHAT IS HTML::FORMFU
-
 =head1 TABLE OF CONTENTS
 
 =over
@@ -29,10 +27,6 @@ In which you will learn about the different steps involved in form validation, a
 =item Chapter V: L<HTML::FormFu::Manual::Models>
 
 In which you will learn to harness the power of HTML::FormFu models, and build comlex content management applications in a snap.
-
-=item Chapter VI: L<HTML::FormFu::Manual::Ajax>
-
-In which you will be shown tips and tricks about how to work with forms which are dynamically modified on the client side.
 
 =back
 

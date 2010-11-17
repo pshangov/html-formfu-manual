@@ -6,7 +6,7 @@ HTML::FormFu::Manual::ConfigurationFiles - Building a form from configuration fi
 
 =head1 INTRODUCTION
 
-L<HTML::FormFu> has been designed to work with form definitions stored primarily in configuration files. This may be a feature or a drawback, depending on your preferences. L<HTML::FormHandler> is an alternative module which provides similar functionality, but forms are defined via Moose-based class properties, and constraints are Moose subtypes.
+L<HTML::FormFu> has been designed to work with form definitions stored primarily in configuration files. This may be a feature or a drawback, depending on your preferences. L<HTML::FormHandler> is an alternative module which provides similar functionality, but forms are defined via Moose-based attributes, and constraints are Moose subtypes.
 
 =head1 HOW CONFIGURATION INSTRUCTIONS ARE PROCESSED
 
@@ -17,7 +17,6 @@ Before we start looking into actual configuration files, let us examine the way 
   my $definition = {
     action       => 'process_form.cgi'
     indicator    => 'submit',
-    auto_fieldset => 1,
     elements     => [
       {
         type        => 'Text',
@@ -43,7 +42,6 @@ When we invoke C<populate> on the above definition, what happens is that C<popul
 
   $form->action('process_form.cgi');
   $form->indicator('submit');
-  $form->auto_fieldset(1);
   $form->elements([
     {
       type        => 'Text',
@@ -78,7 +76,7 @@ L<HTML::FormFu> internally does the following:
 
 =head2 Aliases
 
-Note that many methods in L<HTML::FormFu> have aliases in the plural and singular. Thus C<element> does the same as C<elements>, C<constraint> does the same as C<constraints>, etc. Further, these methods may take as their arguments either a hashref with the definition of a single item, or an arrayref of hashrefs with definitions for multiple items. As we will see later this is convenient when creating configuration files in different formats. It also means we can rewrite the element definitions in the above form as follows:
+Note that many methods in L<HTML::FormFu> have aliases in the plural and singular. Thus C<element> does the same as C<elements>, C<constraint> does the same as C<constraints>, etc. Also, these methods may take as their arguments either a hashref with the definition of a single item, or an arrayref of hashrefs with definitions of multiple items. As we will see later this is convenient when creating configuration files in different formats. It also means we can rewrite the element definitions in the above form as follows:
 
   $form->element({
     type        => 'Text',
@@ -129,7 +127,7 @@ We can also use the C<get_element> method of the form object to get hold of an e
   my $user_el = $form->get_element({ name => 'user' });
   $user_el->constraints(['Required']);
 
-See L<HTML::FormFu/INTROSPECTION> for a list of all methods available for fetching individual objects from the form (including constraints, filters, etc.).
+See L<HTML::FormFu/INTROSPECTION> for a list of all methods available for fetching individual objects from the form (including constraints, filters, etc.). You can then further modify these element objects by directly invoking methods on them (see the docs for each element for its interface).
 
 =head2 Other methods to modify the form
 
@@ -172,14 +170,13 @@ And finally, L<HTML::FormFu> provides several methods to manipulate the form dir
 
 =head1 USING CONGIGURATION FILES
 
-So far we have only used hashrefs to define our forms. Normally, your forms definitions will be stored in configuration files that you will parse into a hashref and pass to C<populate>. L<HTML::FormFu> provides a convenient method for this, C<load_config_file>. It takes care of loading a configuration file in any of the formats supported by L<Config::Any> and populating the form from it. For example:
+So far we have only used hashrefs to define our forms. Normally, your form definitions will be stored in configuration files that you will parse into a hashref and pass to C<populate>. L<HTML::FormFu> provides a convenient method for this, C<load_config_file>. It takes care of loading a configuration file in any of the formats supported by L<Config::Any> and populating the form from it. For example:
 
   # in login_form.yaml
 
   ---
   action: /login
   indicator: submit
-  auto_fieldset: 1
 
   elements:
     - type: Text
@@ -209,7 +206,6 @@ Most of the examples in the L<HTML::FormFu> documentation and test suite are in 
 
   action /login
   indicator submit
-  auto_fieldset 1
 
   <element>
     type Text
@@ -265,11 +261,11 @@ Eearlier we saw that by using methods such as C<insert_before>, C<insert_after> 
 
 =head1 AVAILABLE CONFIGURATION OPTIONS
 
-The last question we have to answer is where to look for all the options you can use in your configuration file.
+This is an overview of places to look for documentation on the options you can use in your configuration file.
 
 =head2 L<HTML::FormFu>
 
-L<HTML::FormFu> is the base form class. As a general rule, any method that L<HTML::FormFu> provides can be used as a key in your configuration hash (with the exception of C<new>). Below is a list of the main types of methods that you can invoke via a configuratin file. We are not providing detailed documentation for the individual methods here, please consult the respective module for details:
+L<HTML::FormFu> is the base form class. As a general rule, any method that L<HTML::FormFu> provides can be used as a key in your configuration hash. Below is a list of the main types of methods that you can invoke via a configuratin file. We are not providing detailed documentation for the individual methods here, please consult the respective module for details:
 
 =over
 
@@ -295,7 +291,7 @@ In a somewat similar vein, C<default_args> is an option to supply default values
 
 =item Configuration options
 
-All the methods related to the loading of configuration files, as well as the stash, are available in the base L<HTML::FormFu> class and in all other elements and validators. This allows you to load a configuration file from within a configuration file, or to load the contents of specific sub-section of the form from a separate configuration file (see L<Use includes> below). These methods are C<load_config_file>, C<config_callback>, C<config_file_path>, and C<stash>.
+All the methods related to the loading of configuration files, as well as the stash, are available in the base L<HTML::FormFu> class and in all other elements and validators. This allows you to load a configuration file from within a configuration file, or to load the contents of specific sub-section of the form from a separate configuration file. These methods are C<load_config_file>, C<config_callback>, C<config_file_path>, and C<stash>.
 
 =item Options related to model configuration
 
@@ -303,8 +299,8 @@ The C<model> and C<model_config> options are available to both L<HTML::FormFu> a
 
 =item Methods that make no sense in a configuratin file
 
-Some of the methods in L<HTML::FormFu> make no sense in a configuration files, since they require something to be done with their return value. These are for example methods that introspect the state of the form (C<sumtitted>, C<valid>, C<param>), methods that introspect the structure of the form (
-C<get_element>, C<get_filter>, etc. 
+Some of the methods in L<HTML::FormFu> make no sense in a configuration file, since they require something to be done with their return value. These are for example methods that introspect the state of the form (C<sumtitted>, C<valid>, C<param>), methods that introspect the structure of the form (
+C<get_element>, C<get_filter>, the constructor (C<new>), etc. 
 
 =back
 
@@ -333,7 +329,7 @@ When configuring an individual element, the main place to look for configuration
   |      HTML::FormFu::Element      |
   +---------------------------------+
 
-This means that for a complete list of options for a combo box you will have to consult the docs for each of these classes. This can indeed be daunting at the start, but you will soon find that most elements share a large number of common attributes, and most of the differences are documented in the top level element classes. You will normally find information about the parents of each class in the C<DESCRIPTION> section of its documentation.
+This means that for a complete list of options for a combo box you will have to consult the docs for each of these classes. This can indeed be daunting at the start, but you will soon find that most elements share a large number of common attributes, and most of the differences are documented in the top level element classes. You will normally find information about the parents of each class in the beginning of its documentation.
 
 A similar logic applies to the documentation for the various types of classes involved in the validation process. For example, the docs for L<HTML::FormFu::Constraint::Bool> state that it inherits from L<HTML::FormFu::Constraint::Regex> and L<HTML::FormFu::Constraint>, which are the other two classes whose documentation you should consult.
 

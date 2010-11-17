@@ -28,14 +28,14 @@ Once we have an empty form object to work on, we need to tell it about the form 
     <input type="submit" />
   </form>
 
-Our form object will need to consist of an L<HTML::FormFu::Element::Text> object, with an L<HTML::FormFu::Constraint::Required> attached, and an L<HTML::FormFu::Element::Submit> object. But L<HTML::FormFu> does not expect us to create these object by hand and pass them to it. Instead, we give it a hashref that contains information about the form definition, and L<HTML::FormFu> takes care of inflating this definition into the proper objects. Thus, for the above form, a configuration hashref might look like this:
+Our form object will need to consist of an L<HTML::FormFu::Element::Text> object, with an L<HTML::FormFu::Constraint::Required> attached, and an L<HTML::FormFu::Element::Submit> object. But L<HTML::FormFu> does not expect us to create these object by hand. Instead, we pass to the form object a hashref that contains information about the form definition, and L<HTML::FormFu> takes care of inflating this definition into the proper objects. Thus, for the above form, a configuration hashref might look like this:
 
   my $definition = {
     elements => [
 	  {
 	  	type => 'Text',
 		name => 'greeting',
-		constraings => [ 'Required' ],
+		constraints => [ 'Required' ],
 	  },
 	  {
 	  	type => 'Submit',
@@ -53,7 +53,7 @@ Now our form object is loaded with information about the form we want to work wi
 
 =head3 Supplying default values
 
-Once that we have our form definition in place, we can start loading data into it. There are several ways we can do that. If we are displaying the form to the user for the first time, we may want to load some default values into it. This is how we do that:
+Once we have our form definition in place, we can start loading data into it. There are several ways we can do that. If we are displaying the form to the user for the first time, we may want to load some default values into it. This is how we do that:
 
   $form->default_values( { greeting => 'Hello world!' } );
 
@@ -69,7 +69,7 @@ Here we use the C<default_values> method of the model associated by the form, be
 
 =head3 Processing query parameters
 
-If a form has already been submitted, we want it supply it the values entered by the user. This is done by using the C<query> method.
+If a form has already been submitted, we want to supply to it the values entered by the user. This is done by using the C<query> method.
 
   my $submitted_values = {
     greeting => 'Howdy!',
@@ -122,7 +122,7 @@ If, on the other hand, we have supplied a default value of C<'Hello world!'> for
     <input type="submit" />
   </form>
 
-If the form has been submitted but the C<greeting> field is blank, thus violating the C<Required> constraing, an error message will be added:
+If the form has been submitted but the C<greeting> field is blank, thus violating the C<Required> constraint, an error message will be added:
 
   <form>
     <input type="text" name="greeting" value="Hello, world!" />
@@ -164,10 +164,6 @@ This is a simple flowchart that summarizes L<HTML::FormFu>'s workflow:
   |     render     | OR  |     update     | 
   +----------------+     +----------------+ 
 
-
-=head1 EXAMPLE
-
-To put things in perspective, let's put the code samples above into a comlete working example.
 
 =cut
 
