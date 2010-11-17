@@ -8,9 +8,9 @@ use FindBin;
 use lib "$FindBin::Bin/../lib";
 use Books;
 
-my $dbfile = file( $FindBin::Bin, qw( .. db books.db ) );
+my $dbfile = file( $FindBin::Bin, qw( .. root db books.db ) );
 
-$dbfile->remove or die $! if  -e $dbfile;
+$dbfile->remove or die $! if -e $dbfile;
 
 my $schema = Books->connect("dbi:SQLite:dbname=$dbfile", undef, undef);
 $schema->deploy;

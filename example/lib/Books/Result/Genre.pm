@@ -20,6 +20,7 @@ column 'fiction' => {
 
 primary_key 'id';
   
-many_to_many 'books' => ( 'Books::Result::Book', 'genre_id' );
+has_many 'book_genres' => ( 'Books::Result::BookGenre', 'genre_id' );
+many_to_many 'books' => ( 'book_genres', 'book' );
 
 1;

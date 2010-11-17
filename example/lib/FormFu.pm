@@ -11,7 +11,7 @@ use Catalyst    qw(-Debug Static::Simple);
 
 our $VERSION = '0.01';
 
-my $dbfile = file( $FindBin::Bin, qw( .. db books.db ) );
+my $dbfile = file( $FindBin::Bin, qw( .. root db books.db ) );
 
 __PACKAGE__->config( 
 

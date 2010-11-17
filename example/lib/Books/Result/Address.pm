@@ -9,22 +9,8 @@ column 'id' => {
     is_auto_increment => 1,
 };
   
-column 'country' => {
-	data_type   => 'varchar',
-	size        => 256,
-	is_nullable => 1,
-};
-
-column 'city' => {
-	data_type   => 'varchar',
-	size        => 256,
-	is_nullable => 1,
-};
-
-column 'street' => {
-	data_type  => 'varchar',
-	size        => 1000,
-	is_nullable => 1,
+column 'address' => {
+	data_type   => 'text',
 };
 
 column 'author_id' => {
