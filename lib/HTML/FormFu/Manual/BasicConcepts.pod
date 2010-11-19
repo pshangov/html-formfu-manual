@@ -42,7 +42,7 @@ Elements are the individual user interface items that comprise a form - input fi
 
 =item Simple form elements
 
-These are for example buttons, text fields, checkboxes, etc. See L<HTML::FormFu::Element/CORE FORM FIELDS> for a complete list of these.
+These are for example buttons, text fields, checkboxes, etc. See L<HTML::FormFu::Element/"CORE FORM FIELD"S> for a complete list of these.
 
 =item Derived form elements
 
@@ -100,7 +100,7 @@ A multi element is used to create a single form element comprising several indiv
 
 =head2 Form validation 
 
-All of these are components of HTML::FormFu's data validation framework. They work in the following order:
+All of these are components of L<HTML::FormFu>'s data validation framework. They work in the following order:
 
 =over
 
@@ -130,7 +130,7 @@ Models are one of the most powerful aspects of L<HTML::FormFu>. They allow you t
 
 =item L<HTML::FormFu::Model::DBIC>
 
-L<HTML::FormFu::Model::DBIC> allows you to link a form with a L<DBIx::Class::ResultSet> object, so that you can load default values into the form from this object, or update it with the submitted form information.
+L<HTML::FormFu::Model::DBIC> allows you to link a form with a L<DBIx::Class::Row> object, so that you can load default values into the form from this object, or update it with the submitted form information.
 
 =item L<HTML::FormFu::Model::HashRef>
 

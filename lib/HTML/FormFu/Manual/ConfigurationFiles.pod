@@ -12,7 +12,7 @@ L<HTML::FormFu> has been designed to work with form definitions stored primarily
 
 =head2 Hash keys as methods
 
-Before we start looking into actual configuration files, let us examine the way HTML::FormFu processes that data structure that is passed to C<populate>. Let us have a look at the following configuration hash (if the meaning of some of the options is unclear to you don't worry, we will explain them further on in the tutorial):
+Before we start looking into actual configuration files, let us examine the way HTML::FormFu processes that data structure that is passed to L<populate|HTML::FormFu/"populate">. Let us have a look at the following configuration hash (if the meaning of some of the options is unclear to you don't worry, we will explain them further on in the tutorial):
 
   my $definition = {
     action       => 'process_form.cgi'
@@ -38,7 +38,7 @@ Before we start looking into actual configuration files, let us examine the way 
 
   $form->populate($definition);
 
-When we invoke C<populate> on the above definition, what happens is that C<populate> basically calls each key of the hash as a method of the form object. Thus, the following achieves identical results as above (the order of execution will not be the same - C<populate> has its own algorithm to determine which mehtods to call in what order):
+When we invoke L<populate|HTML::FormFu/"populate"> on the above definition, what happens is that L<populate|HTML::FormFu/"populate"> basically calls each key of the hash as a method of the form object. Thus, the following achieves identical results as above (the order of execution will not be the same - L<populate|HTML::FormFu/"populate"> has its own algorithm to determine which mehtods to call in what order):
 
   $form->action('process_form.cgi');
   $form->indicator('submit');
@@ -76,7 +76,7 @@ L<HTML::FormFu> internally does the following:
 
 =head2 Aliases
 
-Note that many methods in L<HTML::FormFu> have aliases in the plural and singular. Thus C<element> does the same as C<elements>, C<constraint> does the same as C<constraints>, etc. Also, these methods may take as their arguments either a hashref with the definition of a single item, or an arrayref of hashrefs with definitions of multiple items. As we will see later this is convenient when creating configuration files in different formats. It also means we can rewrite the element definitions in the above form as follows:
+Note that many methods in L<HTML::FormFu> have aliases in the plural and singular. Thus L<element|HTML::FormFu/"element"> does the same as L<elements|HTML::FormFu/"elements">, L<constraint|HTML::FormFu/"constraint"> does the same as L<constraints|HTML::FormFu/"constraints">, etc. Also, these methods may take as their arguments either a hashref with the definition of a single item, or an arrayref of hashrefs with definitions of multiple items. As we will see later this is convenient when creating configuration files in different formats. It also means we can rewrite the element definitions in the above form as follows:
 
   $form->element({
     type        => 'Text',
@@ -97,7 +97,7 @@ Note that many methods in L<HTML::FormFu> have aliases in the plural and singula
 
 =head2 Accessing the element object
 
-The C<elements> method returns a list of element objects. This gives us the opportunity to work directly with it if we wish to. Here is yet another way to configure the elements specified above:
+The L<elements|HTML::FormFu/"elements"> method returns a list of element objects. This gives us the opportunity to work directly with it if we wish to. Here is yet another way to configure the elements specified above:
 
   my ($user_el, $pass_el, $submit_el) = $form->elements([
     {
@@ -117,7 +117,7 @@ The C<elements> method returns a list of element objects. This gives us the oppo
   $user_el->constraints(['Required']);
   $pass_el->constraints(['Required']);
 
-We can also use the C<get_element> method of the form object to get hold of an element object:
+We can also use the L<get_element|HTML::FormFu/"get_element"> method of the form object to get hold of an element object:
 
   $form->element({
     type        => 'Text',
@@ -127,11 +127,11 @@ We can also use the C<get_element> method of the form object to get hold of an e
   my $user_el = $form->get_element({ name => 'user' });
   $user_el->constraints(['Required']);
 
-See L<HTML::FormFu/INTROSPECTION> for a list of all methods available for fetching individual objects from the form (including constraints, filters, etc.). You can then further modify these element objects by directly invoking methods on them (see the docs for each element for its interface).
+See L<HTML::FormFu/"INTROSPECTION"> for a list of all methods available for fetching individual objects from the form (including constraints, filters, etc.). You can then further modify these element objects by directly invoking methods on them (see the docs for each element for its interface).
 
 =head2 Other methods to modify the form
 
-And finally, L<HTML::FormFu> provides several methods to manipulate the form directly: C<insert_before>, C<insert_after> and C<remove_element>. These methods allow you to perform additional processing on a form after it has been populated from a configuration file:
+And finally, L<HTML::FormFu> provides several methods to manipulate the form directly: L<insert_before|HTML::FormFu/"insert_before">, L<insert_after|HTML::FormFu/"insert_after"> and L<remove_element|HTML::FormFu/"remove_element">. These methods allow you to perform additional processing on a form after it has been populated from a configuration file:
 
   my $definition = {
     elements     => [
@@ -145,14 +145,14 @@ And finally, L<HTML::FormFu> provides several methods to manipulate the form dir
         name        => 'pass',
         constraints => ['Required'],
       },
-	  {
-	    type => 'Checkbox',
-		name => 'remember_me',
-	  }
-	  {
+      {
+        type => 'Checkbox',
+        name => 'remember_me',
+      }
+      {
         type => 'Reset',
         name => 'reset',
-	  }
+      }
     ],
   };
 
@@ -172,7 +172,7 @@ And finally, L<HTML::FormFu> provides several methods to manipulate the form dir
 
 =head1 USING CONGIGURATION FILES
 
-So far we have only used hashrefs to define our forms. Normally, your form definitions will be stored in configuration files that you will parse into a hashref and pass to C<populate>. L<HTML::FormFu> provides a convenient method for this, C<load_config_file>. It takes care of loading a configuration file in any of the formats supported by L<Config::Any> and populating the form from it. For example:
+So far we have only used hashrefs to define our forms. Normally, your form definitions will be stored in configuration files that you will parse into a hashref and pass to C<populate>. L<HTML::FormFu> provides a convenient method for this, L<load_config_file|HTML::FormFu/"load_config_file">. It takes care of loading a configuration file in any of the formats supported by L<Config::Any> and populating the form from it. For example:
 
   # in login_form.yaml
 
@@ -202,7 +202,7 @@ So far we have only used hashrefs to define our forms. Normally, your form defin
   my $form = HTML::FormFu->new;
   $form->load_config_file('login_form.yaml');
 
-Most of the examples in the L<HTML::FormFu> documentation and test suite are in the YAML, but it is not difficult to translate them to other formats. If we are using L<Config::General> format the form will look like that (it is more apporpirate to use C<element> instead of C<elements> here):
+Most of the examples in the L<HTML::FormFu> documentation and test suite are in the YAML, but it is not difficult to translate them to other formats. If we are using L<Config::General> format the form will look like that (it is more apporpirate to use L<element|HTML::FormFu/"element"> instead of L<elements|HTML::FormFu/"elements"> here):
 
   # in login_form.conf
 
@@ -235,7 +235,7 @@ Most of the examples in the L<HTML::FormFu> documentation and test suite are in 
 
 =head1 PREPROCESSING CONFIGURATION FILES
 
-Eearlier we saw that by using methods such as C<insert_before>, C<insert_after> and C<remove_element> we can manipulate the form object after it has been initially populated (from a configuration file or otherwise). Another way to modify the form definition stored in file is to preprocess the file I<before> it is passed to C<populate>.
+Eearlier we saw that by using methods such as L<insert_before|HTML::FormFu/"insert_before">, L<insert_after|HTML::FormFu/"insert_after"> and L<remove_element|HTML::FormFu/"remove_element"> we can manipulate the form object after it has been initially populated (from a configuration file or otherwise). Another way to modify the form definition stored in file is to preprocess the file I<before> it is passed to L<populate|HTML::FormFu/"populate">.
 
   # in login_form.yaml
 
@@ -254,16 +254,16 @@ Eearlier we saw that by using methods such as C<insert_before>, C<insert_after> 
 
   # add a 'Required' constraint to the 'user' and 'pass' elements
   $form->config_callback({
-	hash => sub {
-		if ( defined $_->{name} and $_->{name} =~ /^user|pass$/ ) {
-			$_->{constraints} = ['Required'];
-		}
-	}
+    hash => sub {
+        if ( defined $_->{name} and $_->{name} =~ /^user|pass$/ ) {
+            $_->{constraints} = ['Required'];
+        }
+    }
   });
 
   $form->load_config_file('login_form.yaml');
 
-You have to pass to C<config_callback> a hashref in a format compliant with L<Data::Visitor::Callback/CALLBACKS>. The keys are the type of data that you want to process, and the value is the coderef that will be executed. Inside the coderef, C<$_> variable will be set to the data that is currently being processed.
+The argument to  L<config_callback|HTML::FormFu/"config_callback"> is a hashref in a format compliant with L<Data::Visitor::Callback/"CALLBACKS">. The keys are the type of data that you want to process, and the value is the coderef that will be executed. Inside the coderef, the C<$_> variable will be set to the data that is currently being processed.
 
 =head1 AVAILABLE CONFIGURATION OPTIONS
 
@@ -277,7 +277,7 @@ L<HTML::FormFu> is the base form class. As a general rule, any method that L<HTM
 
 =item Attributes of the form element
 
-The L<HTML::FormFu> class roughly corresponds to the html C<E<lt>formE<gt>> tag of that form. Therefore, like all other elements in the L<HTML::FormFu>, it has an C<attributes> method that you can use to set custom attributes of the C<E<lt>formE<gt>> tag. There are special methods for some of the more important form attributes, namely C<id>, C<action>, C<enctype> and C<method>.
+The L<HTML::FormFu> class roughly corresponds to the html C<E<lt>formE<gt>> tag of that form. Therefore, like all other elements in the L<HTML::FormFu>, it has an  L<attributes|HTML::FormFu/"attributes"> method that you can use to set custom attributes of the C<E<lt>formE<gt>> tag. There are special methods for some of the more important form attributes, namely  L<id|HTML::FormFu/"id">, L<action|HTML::FormFu/"action">, L<enctype|HTML::FormFu/"enctype"> and  L<method|HTML::FormFu/"method">.
 
 =item Other options that apply to the form as a whole
 
@@ -285,7 +285,7 @@ A number of other methods configure various aspects of the form behavior and out
 
 =item Form elements
 
-The C<element> and C<elements> methods, as we saw above, are the means to add elements to the form.
+The  L<element|HTML::FormFu/"element"> and L<elements|HTML::FormFu/"elements"> methods, as we saw above, are the means to add elements to the form.
 
 =item Default validation options
 
@@ -293,7 +293,7 @@ The base L<HTML::FormFu> class also supports all methods to create filters, cons
 
 =item Default attributes
 
-In a somewat similar vein, C<default_args> is an option to supply default values to any type of element, constraint, etc.
+In a somewat similar vein,  L<default_args|HTML::FormFu/"default_args"> is an option to supply default values to any type of element, constraint, etc.
 
 =item Configuration options
 
@@ -305,8 +305,7 @@ The C<model> and C<model_config> options are available to both L<HTML::FormFu> a
 
 =item Methods that make no sense in a configuratin file
 
-Some of the methods in L<HTML::FormFu> make no sense in a configuration file, since they require something to be done with their return value. These are for example methods that introspect the state of the form (C<sumtitted>, C<valid>, C<param>), methods that introspect the structure of the form (
-C<get_element>, C<get_filter>, the constructor (C<new>), etc. 
+Some of the methods in L<HTML::FormFu> make no sense in a configuration file, since they require something to be done with their return value. These are for example methods that introspect the state of the form (L<submtitted|HTML::FormFu/"submtitted">, L<valid|HTML::FormFu/"valid">, L<param|HTML::FormFu/"param">), methods that introspect the structure of the form (L<get_element|HTML::FormFu/"get_element">, L<get_filter|HTML::FormFu/"get_filter">, the constructor (L<new|HTML::FormFu/"new">), etc. 
 
 =back
 
@@ -341,6 +340,6 @@ A similar logic applies to the documentation for the various types of classes in
 
 =head2 Model options
 
-And last but not least, a lot of important options pertaining to the specific model class you are using will be found in the docs for that class, specifically the options that can be passed to C<model_config> for the individual form elements.
+And last but not least, a lot of important options pertaining to the specific model class you are using will be found in the docs for that class, specifically the options that can be passed to L<model_config|HTML::FormFu/"model_config"> for the individual form elements.
 
 =cut

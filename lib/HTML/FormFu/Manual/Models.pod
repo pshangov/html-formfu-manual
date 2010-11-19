@@ -14,7 +14,7 @@ Currently there are two models available for use with L<HTML::FormFu>: L<HTML::F
 
 =head1 WORKING WITH MODELS - THE BASICS
 
-Every L<HTML::FormFu> object with a properly configured model has a C<model> method which returns the underlying model object. You can access the functionality that the model provides by invoking methods on that model object. Additionally, you can pass configuration options to the model object byu invoking the C<model_config> method of individual form elements.
+Every L<HTML::FormFu> object with a properly configured model has a C<model> method which returns the underlying model object. You can access the functionality that the model provides by invoking methods on that model object. Additionally, you can pass configuration options to the model object by invoking the L<model_config|HTML::FormFu::Element/"model_config"> method of individual form elements.
 
 Let us look first at the functionality of the model object. It has two very important methods: 
 
@@ -22,11 +22,11 @@ Let us look first at the functionality of the model object. It has two very impo
 
 =item default_values
 
-This method is similar to the C<default_values> method of the base L<HTML::FormFu> class, but while the C<$form-E<gt>default_values> accepts as its argument a simple hash of field names and their respective values, C<$form-E<gt>model-E<gt>default_values> allows us to fill in a form with default values from arguments that are specific to every model class. For example, L<HTML::FormFu::Model::HashRef> fills in default values from a hashref, while L<HTML::FormFu::Model::DBIC> fills in default values from a C<DBIx::Class::Result> object. Internally, each model class converts the values of its argument into a simple hash and passes its values to C<default_values> in L<HTML::FormFu>.
+This method is similar to the L<default_values|HTML::FormFu/"default_values"> method of the base L<HTML::FormFu> class, but while the C<$form-E<gt>default_values> accepts as its argument a simple hash of field names and their respective values, C<$form-E<gt>model-E<gt>default_values> allows us to fill in a form with default values from arguments that are specific to every model class. For example, L<HTML::FormFu::Model::HashRef> fills in default values from a hashref, while L<HTML::FormFu::Model::DBIC> fills in default values from a C<DBIx::Class::Row> object. Internally, each model class converts the values of its argument into a simple hash and passes its values to L<default_values|HTML::FormFu/"default_values"> in L<HTML::FormFu>.
 
 =item update
 
-The C<update> method updates a foreign object specific to the model class with the values from the submitted form. With L<HTML::FormFu::Model::HashRef> it will create a hashref with the values from the form. With L<HTML::FormFu::Model::DBIC> it will take as an argument to update a C<DBIx::Class::Result> object, and its values in the database will be updated with the ones submitted from the form. Here is an example of how to use C<update> in conjunction with C<default_values>: 
+The L<update|HTML::FormFu::Model::DBIC/"update"> method updates a foreign object specific to the model class with the values from the submitted form. With L<HTML::FormFu::Model::HashRef> it will create a hashref with the values from the form. With L<HTML::FormFu::Model::DBIC> it will take as an argument to update a C<DBIx::Class::Row> object, and its values in the database will be updated with the ones submitted from the form. Here is an example of how to use L<update|HTML::FormFu::Model::DBIC/"update"> in conjunction with L<default_values|HTML::FormFu::Model::DBIC/"default_values">: 
 
   # fetch a record from the database
   my $record = $dbic_resultset->find({ id => 5 });
@@ -38,24 +38,24 @@ The C<update> method updates a foreign object specific to the model class with t
   if ($form->submitted_and_valid)
   {
     # take the submitted values, update the record object
-	# and save to database
+    # and save to database
     $form->model->update($record);
   }
   
 =back
 
-=head1 USING HTML::FORMFU::MODEL::DBIC
+=head1 USING HTML::FormFu::Model::DBIC
 
 The rest of this chapter will focus exclusively on L<HTML::FormFu::Model::DBIC>, since this is the  more complex module and the one that you are most likely to need in your applications.
 
 =head2 Loading and configuring the model class
 
-Use the C<model> method of the L<HTML::FormFu> object to specify which model class you want to load:
+Use the L<model|HTML::FormFu/"model"> method of the L<HTML::FormFu> object to specify which model class you want to load:
   
   # loads HTML::FormFu::Model::DBIC
   $form->model('DBIC');
 
-Normally your form will work with a particular DBIx::Class schema. You specify the name of that schema by putting a C<model> entry in the form's stash:
+Normally your form will work with a particular L<DBIx::Class> schema. You specify the name of that schema by putting a C<schema> entry in the form's stash:
 
   my $schema = My::Schema::Class->connect( ... );
   $form->stash( schema => $schema );
@@ -64,9 +64,9 @@ If you are working with Catalyst, you can just supply the name of a Catalyst mod
 
   $form->stash( schema => 'Model::My::Schema::Class' );
 
-Although a form is normally associated with a particular L<DBIx::Class> result class, you do not normally have to specify which class that is. Instead, you pass an object of that class as the argument to C<default_values> or C<update>. L<HTML::FormFu> will work happiliy as long as you have given it an object which has columns and relationships corresponding to the ones you have specified in the form definition.
+Although a form is in practice associated with a particular L<DBIx::Class::ResultSource>, you do not normally have to specify which class that is. Instead, you pass an object of that class as the argument to L<default_values|HTML::FormFu::Model::DBIC/"default_values"> or L<update|HTML::FormFu::Model::DBIC/"update">. L<HTML::FormFu> will work happiliy as long as you have given it an object which has columns and relationships corresponding to the ones you have specified in the form definition.
 
-Most of the model configuration happens via the C<model_config> method of individual form elements. We will describe some of the most important options below.
+Most of the model configuration happens via the L<model_config|HTML::FormFu/"model_config"> method of individual form elements. We will describe some of the most important options below.
 
 =head2 Populating select fields
 
@@ -83,13 +83,13 @@ We have a C<Books> schema for a database containing information about books. One
   table 'genre';
   
   column 'id' => {
-  	data_type         => 'int',
+    data_type         => 'int',
     is_auto_increment => 1,
   };
     
   column 'name' => {
-	  data_type => 'varchar',
-	  size      => 256,
+    data_type => 'varchar',
+    size      => 256,
   };
   
   primary_key 'id';
@@ -205,9 +205,9 @@ The form element must inherit from L<HTML::FormFu::Element::_Group>, i.e. one of
 
 =item * 
 
-The C<resultset> option must be passed to C<model_config>, so that L<HTML::FormFu::Model::DBIC> knows which result class to use to fetch the values. If C<resultset> does not contain any column (C<:>) characters, it will be expanded into a result class belonging to the loaded schema (i.e. C<Genre> will become C<Books::Result::Genre>). Otherwise it will be used as is.
+The C<resultset> option must be passed to L<model_config|HTML::FormFu/"model_config">, so that L<HTML::FormFu::Model::DBIC> knows which result class to use to fetch the values. If C<resultset> does not contain any column (C<:>) characters, it will be expanded into a result class belonging to the loaded schema (i.e. C<Genre> will become C<Books::Result::Genre>). Otherwise it will be used as is.
 
-If no resultset is specified, but C<model_config> is present, L<HTML::FormFu::Model::DBIC> will attempt to guess the result class from the name of the element. So, the following two element definitionss are equivalent:
+If no resultset is specified, but L<model_config|HTML::FormFu/"model_config"> is present, L<HTML::FormFu::Model::DBIC> will attempt to guess the result class from the name of the element. So, the following two element definitionss are equivalent:
 
   <element>
     name something
@@ -234,8 +234,8 @@ And last, we may need to specify which colum to use as the value for each option
     type Select
     <model_config>
       resultset Genre
-	  id_column id
-	  label_column name
+      id_column id
+      label_column name
     </model_config>
   </element>
 
@@ -270,7 +270,7 @@ And of course we add the new column in our C<Books::Result::Genre> class as well
 
   column 'fiction' => {
     data_type => 'int',
-	size      => 1,
+    size      => 1,
   };
 
   ...
@@ -283,8 +283,8 @@ Now if we are required to create a form for editing non-fiction books, we may re
     <model_config>
       resultset Genre
       <condition>
-	    fiction 0
-	  </condition>
+        fiction 0
+      </condition>
     </model_config>
   </element>
 
@@ -311,28 +311,28 @@ This will produce the following form:
     </div>
   </form>
 
-L<HTML::FormFu::Model::DBIC> has two complementary options that affect how rows are selected: C<condition> and C<attributes>. They are passed as the first and second argument to L<DBIx::Class::ResultSet::search> respectively. That is, if you have the following C<model_config> specification for an element:
+L<HTML::FormFu::Model::DBIC> has two complementary options that affect how rows are selected: C<condition> and C<attributes>. They are passed as the first and second argument to L<DBIx::Class::ResultSet::search> respectively. That is, if you have the following L<model_config|HTML::FormFu/"model_config"> specification for an element:
 
   <model_config>
     resultset SomeResultSource
     <condition>
-	  ...
-	</condition>
-	<attributes>
-	  ...
-	</attributes>
+      ...
+    </condition>
+    <attributes>
+      ...
+    </attributes>
   </model_config>
 
 Assuming that the above definition is parsed into a C<$model_config> hashref, L<HTML::FormFu::Model::DBIC> will internally do something like this to fetch the rows containing the requested options:
 
   $schema->resultset( $model_config->resultset )->search( 
     $model_config->condition, 
-	$model_config->attributes,
+    $model_config->attributes,
   );
 
 =head2 Displaying and updating table fields
 
-Now let us look at the most important part of working with models - automatically retrieving, displaying and updating data from the data store. The key link between fields in the database and fields in the form is the C<name> attribute. Let us start with a simple book table. Here is the definition of the ResultSource class:
+Now let us look at the most important part of working with models - automatically retrieving, displaying and updating data from the data store. The key link between fields in the database and fields in the form is the L<name|HTML::FormFu::Element/"name"> attribute. Let us start with a simple book table. Here is the definition of the L<ResultSource|DBIx::Class::ResultSource> class:
 
   ### Books/Result/Book.pm ###
 
@@ -343,18 +343,18 @@ Now let us look at the most important part of working with models - automaticall
   table 'book';
 
   column 'id' => {
-	data_type         => 'int',
+    data_type         => 'int',
     is_auto_increment => 1,
   };
 
   column 'title' => {
-	data_type => 'varchar',
-	size      => 1000,
+    data_type => 'varchar',
+    size      => 1000,
   };
 
   column 'author' => {
-	data_type => 'varchar',
-	size      => 1000,
+    data_type => 'varchar',
+    size      => 1000,
   };
 
   primary_key 'id';
@@ -366,13 +366,13 @@ The configuration file for a form to edit a book record may look like this:
   <element>
     name title
     type Text
-	label "Title"
+    label "Title"
   </element>
   
   <element>
     name author
     type Text
-	label "Author"
+    label "Author"
   </element>
 
   <element>
@@ -383,11 +383,11 @@ Now if we display the form and the user enters some values, we would need to do 
 
   ...
   if ($form->submitted_and_valid) {
-  	my $result = $schema->resultset('Book')->new_result({});
-	$form->model->update($result);
+    my $result = $schema->resultset('Book')->new_result({});
+    $form->model->update($result);
   }
 
-This creates a new empty record, and passes it to C<update>, which takes care of updating the record with the submitted values and saving it into the database. Here is how to go about editing an existing record:
+This creates a new empty record, and passes it to L<update|HTML::FormFu::Model::DBIC/"update">, which takes care of updating the record with the submitted values and saving it into the database. Here is how to go about editing an existing record:
 
   my $result = $schema->resultset('Book')->find({ id => $id });
   $form->model->default_values($result);
@@ -395,7 +395,7 @@ This creates a new empty record, and passes it to C<update>, which takes care of
 The form will be displayed with data from that record filled-in. After the form is submitted, updating the result object is as simple as:
 
   if ($form->submitted_and_valid) {
-	$form->model->update($result);
+    $form->model->update($result);
   }
 
 =head2 Displaying and updating fields from related tables
@@ -411,18 +411,18 @@ So far so good, but things become more complicated when a result object involves
   table 'book';
 
   column 'id' => {
-	data_type => 'int',
+    data_type => 'int',
     is_auto_increment => 1,
   };
 
   column 'title' => {
-	data_type => 'varchar',
-	size      => 1000,
+    data_type => 'varchar',
+    size      => 1000,
   };
 
   column 'genre_id' => {
-	data_type      => 'int',
-	is_foreign_key => 1,
+    data_type      => 'int',
+    is_foreign_key => 1,
   };
 
   primary_key 'id';
@@ -437,16 +437,16 @@ We will add a select field to our form definition to select a genre.
   <element>
     name genre
     type Select
-	label Genre
+    label Genre
     <model_config>
       resultset Genre
     </model_config>
   </element>
   ...
 
-You can use either C<genre>, or C<genre_id> as field name here. In the former case C<HTML::FormFu> will figure out that you want to update the C<genre> relationship and will know that it can do that by setting C<genre_id> in the C<book> table to the desired id. In the latter case it will just update C<genre_id> directly - in both cases the result will be the same. It is generally cleaner to use the name of the relationship as the C<name> attribute. For this to work, of course, we will have to use a form element that is based on L<HTML::FormFu::Element::_Group> and allows setting of a single option only, i.e.  L<HTML::FormFu::Element::Radiogroup> or L<HTML::FormFu::Element::Select> without the multiple attribute.
+You can use either C<genre>, or C<genre_id> as field name here. In the former case C<HTML::FormFu> will figure out that you want to update the C<genre> relationship and will know that it can do that by setting C<genre_id> in the C<book> table to the desired id. In the latter case it will just update C<genre_id> directly - in both cases the result will be the same. It is generally cleaner to use the name of the relationship as the L<name|HTML::FormFu::Element/"name"> attribute. For this to work, of course, we will have to use a form element that is based on L<HTML::FormFu::Element::_Group> and allows setting of a single option only, i.e. L<HTML::FormFu::Element::Radiogroup> or L<HTML::FormFu::Element::Select> without the multiple attribute.
 
-This becomes even more clear if we consider C<many_to_many> relationships. Let us say that some time after we have implemented our database, a new requirement comes up that more than one genre may be spefied for each book. To achieve that, we will need to add an intermediary table to keep track of the links between books and genres. We will have the following three result source classes:
+This becomes even more clear if we consider L<many_to_many|DBIx::Class::Relationship/"many_to_many"> relationships. Let us say that some time after we have implemented our database, a new requirement comes up that more than one genre may be spefied for each book. To achieve that, we will need to add an intermediary table to keep track of the links between books and genres. We will have the following three result source classes:
 
   ### Books/Result/Book.pm ###
 
@@ -457,13 +457,13 @@ This becomes even more clear if we consider C<many_to_many> relationships. Let u
   table 'book';
 
   column 'id' => {
-	data_type => 'int',
+    data_type => 'int',
     is_auto_increment => 1,
   };
 
   column 'title' => {
-	data_type => 'varchar',
-	size      => 1000,
+    data_type => 'varchar',
+    size      => 1000,
   };
 
   primary_key 'id';
@@ -483,17 +483,17 @@ This becomes even more clear if we consider C<many_to_many> relationships. Let u
   table 'genre';
   
   column 'id' => {
-	data_type         => 'int',
+    data_type         => 'int',
     is_auto_increment => 1,
   };
   
   column 'name' => {
-	data_type => 'varchar',
-	size      => 256,
+    data_type => 'varchar',
+    size      => 256,
   };
   
   column 'fiction' => {
-	data_type => 'boolean',
+    data_type => 'boolean',
   };
 
   primary_key 'id';
@@ -535,10 +535,10 @@ The only thing we need to do to make the new relationship work is to change the 
   <element>
     name genre
     type Select
-	label Genre
-	<attributes>
-	  multiple 1
-	</attributes>
+    label Genre
+    <attributes>
+      multiple 1
+    </attributes>
     <model_config>
       resultset Genre
     </model_config>
@@ -549,7 +549,7 @@ Now updating the result object will correctly set C<genre_id> and C<book_id> in 
 
 =head2 Directly editing fields in related tables
 
-In the above examples we used lists of predifined options to set data related to other tables. Sometimes, however, we need to be able to edit directly data that is in a different table. The way this works in L<HTML::FormFu::Model::DBIC> is again very straightforward - to edit fields from a different table, you need to place those fields in a block which has a C<nested_name> property that corresponds to the respective relationship name. L<HTML::FormFu::Model::DBIC> will recognize that these fields belong to the related table and will update them accordingly.
+In the above examples we used lists of predifined options to set data related to other tables. Sometimes, however, we need to be able to edit directly data that is in a different table. The way this works in L<HTML::FormFu::Model::DBIC> is again very straightforward - to edit fields from a different table, you need to place those fields in a L<block|HTML::FormFu::Element::Block> which has a L<nested_name|HTML::FormFu::Element::Block/"nested_name"> property that corresponds to the respective relationship name. L<HTML::FormFu::Model::DBIC> will recognize that these fields belong to the related table and will update them accordingly.
 
 Let us look at some examples now. Imagine that we have an C<author> table in our database with informatin about books, and we have a separate table C<address> that holds the address of each author. Our schema classes will look like this:
 
@@ -562,19 +562,19 @@ Let us look at some examples now. Imagine that we have an C<author> table in our
   table 'author';
 
   column 'id' => {
-	data_type => 'int',
+    data_type => 'int',
     is_auto_increment => 1,
   };
   
   column 'name' => {
-	data_type => 'varchar',
-	size      => 256,
+    data_type => 'varchar',
+    size      => 256,
   };
 
   column 'address_id' => {
-	data_type      => 'int',
-	is_foreign_key => 1,
-	is_nullable    => 1, 
+    data_type      => 'int',
+    is_foreign_key => 1,
+    is_nullable    => 1, 
   };
 
   primary_key 'id';
@@ -593,12 +593,12 @@ Let us look at some examples now. Imagine that we have an C<author> table in our
   table 'address';
 
   column 'id' => {
-	data_type         => 'int',
+    data_type         => 'int',
     is_auto_increment => 1,
   };
   
   column 'address' => {
-	data_type   => 'text',
+    data_type   => 'text',
   };
 
   primary_key 'id';
@@ -613,7 +613,7 @@ When displaying the form to edit an author, we want to be able to edit the autho
   <element>
     name name
     type Text
-	label Name
+    label Name
   </element>
   
   <element>
@@ -623,8 +623,8 @@ When displaying the form to edit an author, we want to be able to edit the autho
     <element>
       name address
       type Textarea
-  	  label Address
-	</element>
+      label Address
+    </element>
 
   </element>
 
@@ -632,7 +632,7 @@ When displaying the form to edit an author, we want to be able to edit the autho
     type Submit
   </element>
 
-When you use C<nested_name> on a block, the value of C<nested_name> will be prepended to the name of each field within that block. This allows L<HTML::FormFu::Model::DBIC> to identify the fields that belong to foreign tables and update them accordingly. The above form will be rendered as follows:
+When you use L<nested_name|HTML::FormFu::Element::Block/"nested_name"> on a block, the value of L<nested_name|HTML::FormFu::Element::Block/"nested_name"> will be prepended to the name of each field within that block. This allows L<HTML::FormFu::Model::DBIC> to identify the fields that belong to foreign tables and update them accordingly. The above form will be rendered as follows:
 
   <form action="" method="post">
     <div class="text label">
@@ -650,7 +650,7 @@ When you use C<nested_name> on a block, the value of C<nested_name> will be prep
     </div>
   </form>
 
-The last and most complicated example that we will look into involves C<has_many> relationships, where we need to work with multiple rows from the related table at once. If we elaborate on the above scenario, imagine that we must modify our database to allow multiple addresses to be specified for each author. The new classes will have the following structure:
+The last and most complicated example that we will look into involves L<has_many|DBIx::Class::Relationship/"has_many"> relationships, where we need to work with multiple rows from the related table at once. If we elaborate on the above scenario, imagine that we must modify our database to allow multiple addresses to be specified for each author. The new classes will have the following structure:
 
   ### Books/Result/Author.pm ###
 
@@ -661,13 +661,13 @@ The last and most complicated example that we will look into involves C<has_many
   table 'author';
 
   column 'id' => {
-	data_type => 'int',
+    data_type => 'int',
     is_auto_increment => 1,
   };
   
   column 'name' => {
-	data_type => 'varchar',
-	size      => 256,
+    data_type => 'varchar',
+    size      => 256,
   };
 
   primary_key 'id';
@@ -686,17 +686,17 @@ The last and most complicated example that we will look into involves C<has_many
   table 'address';
 
   column 'id' => {
-	data_type         => 'int',
+    data_type         => 'int',
     is_auto_increment => 1,
   };
   
   column 'address' => {
-	data_type   => 'text',
+    data_type   => 'text',
   };
 
   column 'author_id' => {
-	data_type      => 'int',
-	is_foreign_key => 1,
+    data_type      => 'int',
+    is_foreign_key => 1,
   };
 
   primary_key 'id';
@@ -716,19 +716,19 @@ All the fields from the related table must be within a L<HTML::FormFu::Element::
 
 =item * 
 
-As above, the C<nested_name> option of the L<HTML::FormFu::Element::Repeatable> block must be set to the name of the respective relationship (C<addresses> in our case).
+As above, the L<nested_name|HTML::FormFu::Element::Repeatable/"nested_name"> option of the L<Repeatable|HTML::FormFu::Element::Repeatable> block must be set to the name of the respective relationship (C<addresses> in our case).
 
 =item *
 
-When you list the fields from the related table in the L<HTML::FormFu::Element::Repeatable> block you must include that table's primary key as a Hidden field. Since we are working with multiple rows this is necessary to identify rows by id when updating the form.
+When you list the fields from the related table in the L<Repeatable|HTML::FormFu::Element::Repeatable> block you must include that table's primary key as a Hidden field. Since we are working with multiple rows this is necessary to identify rows by id when updating the form.
 
 =item * 
 
-The  L<HTML::FormFu::Element::Repeatable> block's C<increment_field_names> must be set to true (it is true by default). We will look into the effects of this option shortly.
+The L<Repeatable|HTML::FormFu::Element::Repeatable> block's L<increment_field_names|HTML::FormFu::Element::Repeatable/"increment_field_names"> must be set to true (it is true by default). We will look into the effects of this option shortly.
 
 =item *
 
-And last but not least, you must include a Hidden field specifying the number of rows from the related table that the form will contain, i.e. how many times the Repeatable block will be repeated. This field must be placed outside the Repeatable block, and be referenced from within the Repeatable block via the C<counter_name> option. For more information, check the documentation on L<HTML::FormFu::Element::Repeatable>.
+And last but not least, you must include a Hidden field specifying the number of rows from the related table that the form will contain, i.e. how many times the Repeatable block will be repeated. This field must be placed outside the Repeatable block, and be referenced from within the Repeatable block via the L<counter_name|HTML::FormFu::Element::Repeatable/"counter_name"> option. For more information, check the documentation on L<HTML::FormFu::Element::Repeatable>.
 
 =back
 
@@ -737,7 +737,7 @@ Here is an example configuration file for the new form:
   <element>
     name name
     type Text
-	label Name
+    label Name
   </element>
   
   <element>
@@ -748,18 +748,18 @@ Here is an example configuration file for the new form:
   <element>
     type Repeatable
     nested_name addresses
-	counter_name address_counter
+    counter_name address_counter
 
     <element>
       name id
       type Hidden
-	</element>
+    </element>
 
     <element>
       name address
       type Textarea
-  	  label Address
-	</element>
+      label Address
+    </element>
 
   </element>
 
@@ -787,13 +787,13 @@ This is how this form will render:
     </div>
   </form>
 
-Notice how the use of the C<increment_field_names> option makes each field from the related table numbered:
+Notice how the use of the L<increment_field_names|HTML::FormFu::Element::Repeatable/"increment_field_names"> option makes each field from the related table numbered:
 
   name="addresses_1.address"
 
 This means that this is the C<address> field from the first row from the table corresponding to the C<addresses> relationship. This C<address> field belongs to the row whose primary key is the value of the C<addresses_1.id> field - currently none since this is an empty form to create a new author. If we have a form with more than one addresses the subsequent fields will be named C<addresses_2.address>, C<addresses_3.address>, etc.
 
-If you want to add to the C<has_many> relationship (i.e. add a new address row for this author), you can use the C<empty_rows> option of the C<model_config> section of the L<HTML::FormFu::Element::Repeatable> block to display the form with the specified number of additional empty rows at the end of the block. Alternatively you can use javascript to add dynamically a new element, e.g. by copying the least element in the L<HTML::FormFu::Element::Repeatable> block and incrementing its counter. And in order to delete an existing element you can add a checkbox with a C<delete_if_true> option of its C<model_config> section set to C<1>. Those addresses with this checkbox checked will be deleted upon form submission. Alternatively you can use javascript to remove this field from the form and decrement the counters of the other elements respectively.
+If you want to add to the C<has_many> relationship (i.e. add a new address row for this author), you can use the C<empty_rows> option of the C<model_config> section of the L<Repeatable|HTML::FormFu::Element::Repeatable> block to display the form with the specified number of additional empty rows at the end of the block. Alternatively you can use javascript to add dynamically a new element, e.g. by copying the least element in the L<Repeatable|HTML::FormFu::Element::Repeatable> block and incrementing its counter. And in order to delete an existing element you can add a checkbox with a C<delete_if_true> option of its C<model_config> section set to C<1>. Those addresses with this checkbox checked will be deleted upon form submission. Alternatively you can use javascript to remove this field from the form and decrement the counters of the other elements respectively.
 
 =head1 EXAMPLE
 

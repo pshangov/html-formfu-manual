@@ -6,7 +6,7 @@ HTML::FormFu::Manual::Validation - How HTML::FormFu validation works
 
 =head1 INTRODUCTION
 
-L<HTML::FormFu>'s validation process is very simple and straighforward, and at the same time very powerful. Basically all you need to understand is how the different stages in the validation process work, and we already explained that in Chapter I - L<HTML::FormFu::Manual::BasicConcepts>. A good overview is also available in L<HTML::FormFu/FORM LOGIC AND VALIDATION>.
+L<HTML::FormFu>'s validation process is very simple and straighforward, and at the same time very powerful. Basically all you need to understand is how the different stages in the validation process work, and we already explained that in Chapter I - L<HTML::FormFu::Manual::BasicConcepts>. A good overview is also available in L<HTML::FormFu/"FORM LOGIC AND VALIDATION">.
 
 =head2 WHERE TO FIND DOCUMENTATION
 
