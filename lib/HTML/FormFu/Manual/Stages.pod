@@ -39,6 +39,8 @@ Our form object will need to consist of an L<HTML::FormFu::Element::Text> object
 	  },
 	  {
 	  	type => 'Submit',
+		name => 'submit'
+		value => 'Submit my greeting!',
 	  },
 	]
   };
@@ -73,7 +75,6 @@ If a form has already been submitted, we want to supply to it the values entered
 
   my $submitted_values = {
     greeting => 'Howdy!',
-	submit => undef,
   };
 
   $from->query($submitted_values);
@@ -112,24 +113,29 @@ Thus, if the form has not been submitted and has not been supplied default value
 
   <form>
     <input type="text" name="greeting" />
-    <input type="submit" />
+    <input type="submit" name="submit" value="Submit my greeting!" />
   </form>
 
 If, on the other hand, we have supplied a default value of C<'Hello world!'> for C<greeting>, the html will reflect it:
 
   <form>
     <input type="text" name="greeting" value="Hello, world!" />
-    <input type="submit" />
+    <input type="submit" name="submit" value="Submit my greeting!" />
   </form>
 
 If the form has been submitted but the C<greeting> field is blank, thus violating the C<Required> constraint, an error message will be added:
 
-  <form>
-    <input type="text" name="greeting" value="Hello, world!" />
-    <input type="submit" />
+  <form action="" method="post">
+    <div class="text error error_constraint_required">
+      <span class="error_message error_constraint_required">This field is required</span>
+      <input name="greeting" type="text" />
+    </div>
+    <div class="submit">
+      <input name="submit" type="submit" value="Submit my greeting!" />
+    </div>
   </form>
 
-If the form has been submitted and valid there will be no need to display it again to the user. If you call render on a validly submitted form it will ...
+If the form has been submitted and valid there will be no need to display it again to the user. If you call render on a validly submitted form it will display the same code as if the query values were passed as C<default_values> to the form.
 
 =head2 Update
 

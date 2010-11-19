@@ -146,27 +146,29 @@ And finally, L<HTML::FormFu> provides several methods to manipulate the form dir
         constraints => ['Required'],
       },
 	  {
-        type => 'Reset'
-        name => 'reset'
+	    type => 'Checkbox',
+		name => 'remember_me',
+	  }
+	  {
+        type => 'Reset',
+        name => 'reset',
 	  }
     ],
-    constraints => ['SingleValue']
   };
 
   $form->populate($definition);
 
-  # remove the reset button
-  my $reset_el = $form->get_element({ name => 'reset' });
+  # remove the "remember me" option
+  my $reset_el = $form->get_element({ name => 'remember_me' });
   $form->remove_element($reset_el);
 
-  # create a submit button
-  # TO CLARIFY: will this not add the element to the form? 
-  # TO CLARIFY: can we pass a simple hash to element?
+  # create a submit button and put it at the end of the form,
+  # i.e. after the reset button
   my $submit_el = $form->element({ type => 'Submit', name => 'submit' });
   
-  # insert it after the password field
-  my $pass_el = $form->get_element({ name => 'pass' });
-  $form->insert_after($submit_el, $pass_el);
+  # move the submit button before the reset button
+  my $reset_el = $form->get_element({ name => 'reset' });
+  $form->insert_before($submit_el, $reset_el);
 
 =head1 USING CONGIGURATION FILES
 
@@ -250,14 +252,18 @@ Eearlier we saw that by using methods such as C<insert_before>, C<insert_after> 
 
   # in your code
 
-  $form->config_callback(
   # add a 'Required' constraint to the 'user' and 'pass' elements
-  	add_required => sub {
-		#TODO
+  $form->config_callback({
+	hash => sub {
+		if ( defined $_->{name} and $_->{name} =~ /^user|pass$/ ) {
+			$_->{constraints} = ['Required'];
+		}
 	}
-  );
+  });
 
   $form->load_config_file('login_form.yaml');
+
+You have to pass to C<config_callback> a hashref in a format compliant with L<Data::Visitor::Callback/CALLBACKS>. The keys are the type of data that you want to process, and the value is the coderef that will be executed. Inside the coderef, C<$_> variable will be set to the data that is currently being processed.
 
 =head1 AVAILABLE CONFIGURATION OPTIONS
 
