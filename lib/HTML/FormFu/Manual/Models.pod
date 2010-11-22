@@ -162,7 +162,7 @@ Nothing surprising here, here is the output that we get when we render the form:
     </div>
   </form>
 
-But if we change the definition of the C<author> field as follows:
+But if we change the definition of the C<genre> field as follows:
 
   <element>
     name genre
