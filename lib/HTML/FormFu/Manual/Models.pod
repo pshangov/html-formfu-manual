@@ -227,7 +227,7 @@ If no resultset is specified, but L<model_config|HTML::FormFu/"model_config"> is
 
 =item *
 
-And last, we may need to specify which colum to use as the value for each option, and which colum to use as the label. By default L<HTML::FormFu::Model::DBIC> uses the column holding the primary key as the value, and the first text column in the table as the label. You can override this behaviour with the C<id_column> and C<label_column> options respectively. The following definition of the select element achieves the same result as above, but is explicit about which columns to use for option values and labels:
+And last, we may need to specify which column to use as the value for each option, and which column to use as the label. By default L<HTML::FormFu::Model::DBIC> uses the column holding the primary key as the value, and the first text column in the table as the label. You can override this behaviour with the C<id_column> and C<label_column> options respectively. The following definition of the select element achieves the same result as above, but is explicit about which columns to use for option values and labels:
 
   <element>
     name genre
@@ -241,7 +241,7 @@ And last, we may need to specify which colum to use as the value for each option
 
 =back
 
-Let us say that at some point later a new requirement comes up that you must add non-fiction generes to the database, and you must be able to distinguish them from the fiction genres. We will add a boolean colum to specify whether a genre is fiction or not. The new C<genre> table will look like that:
+Let us say that at some point later a new requirement comes up that you must add non-fiction generes to the database, and you must be able to distinguish them from the fiction genres. We will add a boolean column to specify whether a genre is fiction or not. The new C<genre> table will look like that:
 
   id  name                     fiction
   --  -----------------------  -------
