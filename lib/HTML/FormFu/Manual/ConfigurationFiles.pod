@@ -4,6 +4,19 @@
 
 HTML::FormFu::Manual::ConfigurationFiles - Building a form from configuration files
 
+=begin stopwords
+
+shangov
+enctype
+hashrefs
+html
+inflators
+param
+preprocess
+validators
+
+=end stopwords
+
 =head1 INTRODUCTION
 
 L<HTML::FormFu> has been designed to work with form definitions stored primarily in configuration files. This may be a feature or a drawback, depending on your preferences. L<HTML::FormHandler> is an alternative module which provides similar functionality, but forms are defined via Moose-based attributes, and constraints are Moose subtypes.
@@ -38,7 +51,7 @@ Before we start looking into actual configuration files, let us examine the way 
 
   $form->populate($definition);
 
-When we invoke L<populate|HTML::FormFu/"populate"> on the above definition, what happens is that L<populate|HTML::FormFu/"populate"> basically calls each key of the hash as a method of the form object. Thus, the following achieves identical results as above (the order of execution will not be the same - L<populate|HTML::FormFu/"populate"> has its own algorithm to determine which mehtods to call in what order):
+When we invoke L<populate|HTML::FormFu/"populate"> on the above definition, what happens is that L<populate|HTML::FormFu/"populate"> basically calls each key of the hash as a method of the form object. Thus, the following achieves identical results as above (the order of execution will not be the same - L<populate|HTML::FormFu/"populate"> has its own algorithm to determine which methods to call in what order):
 
   $form->action('process_form.cgi');
   $form->indicator('submit');
@@ -170,7 +183,7 @@ And finally, L<HTML::FormFu> provides several methods to manipulate the form dir
   my $reset_el = $form->get_element({ name => 'reset' });
   $form->insert_before($submit_el, $reset_el);
 
-=head1 USING CONGIGURATION FILES
+=head1 USING CONFIGURATION FILES
 
 So far we have only used hashrefs to define our forms. Normally, your form definitions will be stored in configuration files that you will parse into a hashref and pass to C<populate>. L<HTML::FormFu> provides a convenient method for this, L<load_config_file|HTML::FormFu/"load_config_file">. It takes care of loading a configuration file in any of the formats supported by L<Config::Any> and populating the form from it. For example:
 
@@ -202,7 +215,7 @@ So far we have only used hashrefs to define our forms. Normally, your form defin
   my $form = HTML::FormFu->new;
   $form->load_config_file('login_form.yaml');
 
-Most of the examples in the L<HTML::FormFu> documentation and test suite are in the YAML, but it is not difficult to translate them to other formats. If we are using L<Config::General> format the form will look like that (it is more apporpirate to use L<element|HTML::FormFu/"element"> instead of L<elements|HTML::FormFu/"elements"> here):
+Most of the examples in the L<HTML::FormFu> documentation and test suite are in the YAML, but it is not difficult to translate them to other formats. If we are using L<Config::General> format the form will look like that (it is more appropriate to use L<element|HTML::FormFu/"element"> instead of L<elements|HTML::FormFu/"elements"> here):
 
   # in login_form.conf
 
@@ -235,7 +248,7 @@ Most of the examples in the L<HTML::FormFu> documentation and test suite are in 
 
 =head1 PREPROCESSING CONFIGURATION FILES
 
-Eearlier we saw that by using methods such as L<insert_before|HTML::FormFu/"insert_before">, L<insert_after|HTML::FormFu/"insert_after"> and L<remove_element|HTML::FormFu/"remove_element"> we can manipulate the form object after it has been initially populated (from a configuration file or otherwise). Another way to modify the form definition stored in file is to preprocess the file I<before> it is passed to L<populate|HTML::FormFu/"populate">.
+Earlier we saw that by using methods such as L<insert_before|HTML::FormFu/"insert_before">, L<insert_after|HTML::FormFu/"insert_after"> and L<remove_element|HTML::FormFu/"remove_element"> we can manipulate the form object after it has been initially populated (from a configuration file or otherwise). Another way to modify the form definition stored in file is to preprocess the file I<before> it is passed to L<populate|HTML::FormFu/"populate">.
 
   # in login_form.yaml
 
@@ -271,7 +284,7 @@ This is an overview of places to look for documentation on the options you can u
 
 =head2 L<HTML::FormFu>
 
-L<HTML::FormFu> is the base form class. As a general rule, any method that L<HTML::FormFu> provides can be used as a key in your configuration hash. Below is a list of the main types of methods that you can invoke via a configuratin file. We are not providing detailed documentation for the individual methods here, please consult the respective module for details:
+L<HTML::FormFu> is the base form class. As a general rule, any method that L<HTML::FormFu> provides can be used as a key in your configuration hash. Below is a list of the main types of methods that you can invoke via a configuration file. We are not providing detailed documentation for the individual methods here, please consult the respective module for details:
 
 =over
 
@@ -293,7 +306,7 @@ The base L<HTML::FormFu> class also supports all methods to create filters, cons
 
 =item Default attributes
 
-In a somewat similar vein,  L<default_args|HTML::FormFu/"default_args"> is an option to supply default values to any type of element, constraint, etc.
+In a somewhat similar vein,  L<default_args|HTML::FormFu/"default_args"> is an option to supply default values to any type of element, constraint, etc.
 
 =item Configuration options
 
@@ -303,9 +316,9 @@ All the methods related to the loading of configuration files, as well as the st
 
 The C<model> and C<model_config> options are available to both L<HTML::FormFu> and to all elements. The actual description of arguments that C<model_config> takes depend on the model used, and are to be found in the documentation of the specific model class (e.g. L<HTML::FormFu::Model::DBIC>).
 
-=item Methods that make no sense in a configuratin file
+=item Methods that make no sense in a configuration file
 
-Some of the methods in L<HTML::FormFu> make no sense in a configuration file, since they require something to be done with their return value. These are for example methods that introspect the state of the form (L<submtitted|HTML::FormFu/"submtitted">, L<valid|HTML::FormFu/"valid">, L<param|HTML::FormFu/"param">), methods that introspect the structure of the form (L<get_element|HTML::FormFu/"get_element">, L<get_filter|HTML::FormFu/"get_filter">, the constructor (L<new|HTML::FormFu/"new">), etc. 
+Some of the methods in L<HTML::FormFu> make no sense in a configuration file, since they require something to be done with their return value. These are for example methods that introspect the state of the form (L<submitted|HTML::FormFu/"submtitted">, L<valid|HTML::FormFu/"valid">, L<param|HTML::FormFu/"param">), methods that introspect the structure of the form (L<get_element|HTML::FormFu/"get_element">, L<get_filter|HTML::FormFu/"get_filter">, the constructor (L<new|HTML::FormFu/"new">), etc. 
 
 =back
 

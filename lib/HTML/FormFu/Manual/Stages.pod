@@ -4,9 +4,16 @@
 
 HTML::FormFu::Manual::Stages - Stages in form processing
 
+=begin stopwords
+
+shangov
+html
+
+=end stopwords
+
 =head1 INTRODUCTION
 
-To really be able to use all the power that L<HTML::FormFu> provides one must understand how it approaches form processing. Modules such as L<Catalyst::Controller::HTML::FormFu> hide the complexity of L<HTML::FormFu>'s workflow, but also make it difficult to figure out what happens in the backgound.
+To really be able to use all the power that L<HTML::FormFu> provides one must understand how it approaches form processing. Modules such as L<Catalyst::Controller::HTML::FormFu> hide the complexity of L<HTML::FormFu>'s workflow, but also make it difficult to figure out what happens in the background.
 
 =head1 FORM PROCESSING STAGES
 
@@ -17,11 +24,11 @@ First, we have to create a form object:
   use HTML::FormFu;
   my $form = HTML::FormFu->new;
 
-This creates a new form object. Note that initally this is a pretty useless form object - it has no form elements, no validation rules, nothing. Basically, we start from zero and will be making our object more powerful as we build our form.
+This creates a new form object. Note that initially this is a pretty useless form object - it has no form elements, no validation rules, nothing. Basically, we start from zero and will be making our object more powerful as we build our form.
 
 =head2 Populate
 
-Once we have an empty form object to work on, we need to tell it about the form we want to create. We need to tell it about the filds we want our form to have, and what validation rules to attach to each field. Let us say that we want to create a form with a single input field and a submit button, and we want the input field to be manadtory. The final markup will look like that:
+Once we have an empty form object to work on, we need to tell it about the form we want to create. We need to tell it about the fields we want our form to have, and what validation rules to attach to each field. Let us say that we want to create a form with a single input field and a submit button, and we want the input field to be mandatory. The final markup will look like that:
 
   <form>
     <input type="text" name="greeting" />
@@ -49,7 +56,7 @@ We will look in more detail into the structure of the configuration hash in the 
 
   $form->populate($definition);
 
-Now our form object is loaded with information about the form we want to work with. Internally, it has converted the data structure we passed it into a list of HTML::FormFu::* objects that are now ready to work with acutal data.
+Now our form object is loaded with information about the form we want to work with. Internally, it has converted the data structure we passed it into a list of HTML::FormFu::* objects that are now ready to work with actual data.
 
 =head2 Load
 
@@ -61,13 +68,13 @@ Once we have our form definition in place, we can start loading data into it. Th
 
 Now when we display the form to the user, she will see the string C<Hello world!> in the input field, and she may change it it she wants to. The L<HTML::FormFu/"default_values"> method of our form object takes as a parameter a single hashref whose keys are the names of form fields we want to supply default values for. 
 
-You will often want to use this functionality when you create forms to edit existing database data. You normally want to get the field values from the database record, supply them as default values to the form, and let the user edit them. Imagine that the form below was use to edit greeting messages stored in a database. Your greetings table is very simple, with only two colums: a greeting id and the greeting text. Assuming that you have a DBIx::Class schema for that database, you may do something like this to supply default values for your form:
+You will often want to use this functionality when you create forms to edit existing database data. You normally want to get the field values from the database record, supply them as default values to the form, and let the user edit them. Imagine that the form below was use to edit greeting messages stored in a database. Your greetings table is very simple, with only two columns: a greeting id and the greeting text. Assuming that you have a DBIx::Class schema for that database, you may do something like this to supply default values for your form:
 
   # table 'greeting' has two colums: 'id' and 'greeting'
   my $result = $schema->resultset('Greeting')->find({ id => 1 });
   $form->model->default_values($result);
 
-Here we use the C<default_values> method of the model associated by the form, because potentially the result object can be a very complex datastructure, and the model's L<HTML::FormFu::Model::DBIC/"default_values"> method takes care of flattening this datastructure to a simple hashref apprporate for the basic L<HTML::FormFu/"default_values"> method. You will learn how to use models later in Chapter V: L<HTML::FormFu::Manual::Models>.
+Here we use the C<default_values> method of the model associated by the form, because potentially the result object can be a very complex data structure, and the model's L<HTML::FormFu::Model::DBIC/"default_values"> method takes care of flattening this data structure to a simple hashref appropriate for the basic L<HTML::FormFu/"default_values"> method. You will learn how to use models later in Chapter V: L<HTML::FormFu::Manual::Models>.
 
 =head3 Processing query parameters
 
@@ -169,6 +176,7 @@ This is a simple flowchart that summarizes L<HTML::FormFu>'s workflow:
   +----------------+     +----------------+ 
   |     render     | OR  |     update     | 
   +----------------+     +----------------+ 
+
 
 =cut
 

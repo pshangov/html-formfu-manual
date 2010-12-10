@@ -1,6 +1,9 @@
 #!/usr/bin/perl -w
-# IMPORTANT: if you delete this file your app will not work as
-# expected.  You have been warned.
+
+# Rename to Makefiel.PL or the example Catalyst app will fail to run
+
+# Under bogus name since otherwise EU::MM will attempt
+# to execute it while installing HTML::FormFu::Manual
 
 use inc::Module::Install;
 

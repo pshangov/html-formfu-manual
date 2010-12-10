@@ -26,8 +26,14 @@ In which you will learn about the different steps involved in form validation, a
 
 =item Chapter V: L<HTML::FormFu::Manual::Models>
 
-In which you will learn to harness the power of HTML::FormFu models, and build comlex content management applications in a snap.
+In which you will learn to harness the power of HTML::FormFu models, and build complex content management applications in a snap.
 
 =back
+
+=begin stopwords
+
+Shangov
+
+=end stopwords
 
 =cut

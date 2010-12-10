@@ -4,7 +4,24 @@
 
 HTML::FormFu::Manual::BasicConcepts - HTML::FormFu Manual Chapter I - Basic Concepts
 
-=head1 THE DIFFERENTS ASPECTS OF FORM PROCESSING
+=begin stopwords
+
+shangov
+inflator
+inflators
+validator
+validators
+deflator
+deflators
+fieldset
+html
+todo
+todos
+checkboxes
+
+=end stopwords
+
+=head1 THE DIFFERENT ASPECTS OF FORM PROCESSING
 
 There are several aspects of form processing, and there are multiple modules on CPAN to handle each of them:
 
@@ -24,7 +41,7 @@ There are a number of modules on CPAN that help validate forms, i.e. check that 
 
 =item Error display
 
-Hand in hand with validation, an important aspect of form processing is the ability to display to the user proper error messages, highlihgting the problematic field, whenever there were problems with the provided input.
+Hand in hand with validation, an important aspect of form processing is the ability to display to the user proper error messages, highlighting the problematic field, whenever there were problems with the provided input.
 
 =item Form submission
 
@@ -50,7 +67,7 @@ These are custom-made form fields based on existing HTML elements (e.g. a date f
 
 =item HTML markup elements
 
-Threre are other a number of elements that you can use to insert HTML code other than input fields. These are:
+There are other a number of elements that you can use to insert HTML code other than input fields. These are:
 
 =over
 
@@ -72,13 +89,13 @@ An HTML horizontal rule.
 
 =item L<HTML::FormFu::Element::Src>
 
-An element wich allows you to insert arbitrary HTML code within the form.
+An element which allows you to insert arbitrary HTML code within the form.
 
 =back 
 
 =item Grouping elements
 
-These are emelements which are designed to contain other elements.
+These are elements which are designed to contain other elements.
 
 =over
 
@@ -88,7 +105,7 @@ A block element is used to separate logically a given group of elements. For exa
 
 =item L<HTML::FormFu::Element::Repeatable>
 
-A repeatable element is used to display a list of items whose number is variable. For example, if you have a form which displays a list of todo's, a repeatable element may be used to display the todo items.
+A repeatable element is used to display a list of items whose number is variable. For example, if you have a form which displays a list of todos, a repeatable element may be used to display the todo items.
 
 =item L<HTML::FormFu::Element::Multi>
 
@@ -110,15 +127,15 @@ Filters are used to perform data cleanup before any actual validation is perform
 
 =item Constraints
 
-Constraints do the bulk of the work that is commonly associatied with form validation. They define rules that a submitted value must match in order to be considered acceptable. There are constrains to check that a given field is required, that it maches a cetain regex, that it is of a certain length, that an uploaded file does not exceed a specified size, that an email address is valid, etc.
+Constraints do the bulk of the work that is commonly associated with form validation. They define rules that a submitted value must match in order to be considered acceptable. There are constrains to check that a given field is required, that it matches a certain regex, that it is of a certain length, that an uploaded file does not exceed a specified size, that an email address is valid, etc.
 
 =item Inflators
 
-Inflators allow you to corece a given field value into an object so that it is easier to work with. A common use of an inflator would be to convert the value of a field representing a date into a L<DateTime> object.
+Inflators allow you to coerce a given field value into an object so that it is easier to work with. A common use of an inflator would be to convert the value of a field representing a date into a L<DateTime> object.
 
 =item Validators
 
-Validators exist in order to allow you to create validation rules that are specific to the logic and state of your application and cannot be applied at constraint level. For example, if you have a registration form that allows users to use their an address as a username, you would use a contraint to check that the email is valid, but you would use a validator to check if this email does not already exist in the database, and display an error if it does. L<HTML::FormFu> does not come with any validators - since they are always application specific you have to create your own validators by subclassing L<HTML::FormFu::Validator>.
+Validators exist in order to allow you to create validation rules that are specific to the logic and state of your application and cannot be applied at constraint level. For example, if you have a registration form that allows users to use their an address as a username, you would use a constraint to check that the email is valid, but you would use a validator to check if this email does not already exist in the database, and display an error if it does. L<HTML::FormFu> does not come with any validators - since they are always application specific you have to create your own validators by subclassing L<HTML::FormFu::Validator>.
 
 =back
 
